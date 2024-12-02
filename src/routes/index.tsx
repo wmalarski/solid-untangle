@@ -7,5 +7,11 @@ export const route = {
 } satisfies RouteDefinition;
 
 export default function Home() {
-	return <main>A</main>;
+	return (
+		<main>
+			<button type="button" class="btn">
+				Button
+			</button>
+		</main>
+	);
 }
