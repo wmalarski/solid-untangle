@@ -35,6 +35,9 @@ importers:
       class-variance-authority:
         specifier: 0.7.1
         version: 0.7.1
+      cookie-es:
+        specifier: ^1.2.2
+        version: 1.2.2
       decode-formdata:
         specifier: 0.8.0
         version: 0.8.0
