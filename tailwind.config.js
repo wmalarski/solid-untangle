@@ -1,7 +1,5 @@
 const cyberpunkTheme = require("daisyui/src/theming/themes").cyberpunk;
 
-console.log("cyberpunkTheme", cyberpunkTheme);
-
 /** @type {import('tailwindcss').Config} */
 module.exports = {
 	content: ["./src/**/*.{html,js,jsx,ts,tsx}"],
