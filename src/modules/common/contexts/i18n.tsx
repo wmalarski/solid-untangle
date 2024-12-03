@@ -43,6 +43,13 @@ const enDict = {
 	dialog: {
 		close: "Close dialog",
 	},
+	board: {
+		zoom: {
+			reset: "Reset zoom",
+			zoomIn: "Zoom in",
+			zoomOut: "Zoom out",
+		},
+	},
 };
 
 export type Locale = "en";

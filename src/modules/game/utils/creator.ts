@@ -1,19 +1,5 @@
 import { nanoid } from "nanoid";
-
-type Connection = {
-	start: number;
-	end: number;
-};
-
-type Position = {
-	x: number;
-	y: number;
-};
-
-type GamePoint = {
-	position: Position;
-	connection: Connection;
-};
+import type { Connection, Point2D } from "./types";
 
 const getNeighbors = (
 	index: number,
@@ -161,18 +147,15 @@ const getConnections = (nodes: number, neighbors: Map<number, Set<number>>) => {
 };
 
 const getPositions = (
-	connections: Connection[],
+	nodes: number,
 	width: number,
 	height: number,
-): GamePoint[] => {
+): Point2D[] => {
 	const padding = 0.1;
 	const negativePadding = 1 - 2 * padding;
-	return connections.map((connection) => ({
-		connection,
-		position: {
-			x: Math.floor(Math.random() * width * negativePadding) + width * padding,
-			y: Math.floor(Math.random() * height * negativePadding) + width * padding,
-		},
+	return Array.from({ length: nodes }, () => ({
+		x: Math.floor(Math.random() * width * negativePadding) + width * padding,
+		y: Math.floor(Math.random() * height * negativePadding) + width * padding,
 	}));
 };
 
@@ -188,6 +171,7 @@ export const createGame = (nodes: number, width: number, height: number) => {
 	);
 
 	const connections = getConnections(nodes, neighbors);
+	const positions = getPositions(nodes, width, height);
 
-	return getPositions(connections, width, height);
+	return { connections, positions };
 };
