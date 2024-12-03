@@ -11,7 +11,13 @@ export const route = {
 export default function Home() {
 	return (
 		<main>
-			<Button onClick={() => createGame(20)}>Button</Button>
+			<Button
+				onClick={() => {
+					console.log(createGame(15));
+				}}
+			>
+				Button
+			</Button>
 			{/* <ul>
 				<Index each={new Array(10)}>
 					{(_index, index) => (
