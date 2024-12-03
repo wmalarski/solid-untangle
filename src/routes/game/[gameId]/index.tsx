@@ -1,5 +1,4 @@
 import type { RouteDefinition } from "@solidjs/router";
-import { Index } from "solid-js";
 import { createGame } from "~/modules/game/utils/creator";
 import { Button } from "~/ui/button/button";
 
@@ -12,8 +11,8 @@ export const route = {
 export default function Home() {
 	return (
 		<main>
-			<Button>Button</Button>
-			<ul>
+			<Button onClick={() => createGame(20)}>Button</Button>
+			{/* <ul>
 				<Index each={new Array(10)}>
 					{(_index, index) => (
 						<pre>
@@ -28,7 +27,7 @@ export default function Home() {
 						</pre>
 					)}
 				</Index>
-			</ul>
+			</ul> */}
 		</main>
 	);
 }
