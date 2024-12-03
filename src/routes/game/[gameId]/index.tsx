@@ -13,7 +13,7 @@ export default function Home() {
 		<main>
 			<Button
 				onClick={() => {
-					console.log(createGame(15));
+					console.log(createGame(15, 1000, 1000));
 				}}
 			>
 				Button

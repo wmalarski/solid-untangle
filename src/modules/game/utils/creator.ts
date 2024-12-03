@@ -5,6 +5,16 @@ type Connection = {
 	end: number;
 };
 
+type Position = {
+	x: number;
+	y: number;
+};
+
+type GamePoint = {
+	position: Position;
+	connection: Connection;
+};
+
 const getNeighbors = (
 	index: number,
 	rows: number,
@@ -84,10 +94,7 @@ const shuffle = <T>(list: T[]) => {
 		.map(({ value }) => value);
 };
 
-const creationConnections = (
-	nodes: number,
-	neighbors: Map<number, Set<number>>,
-) => {
+const getConnections = (nodes: number, neighbors: Map<number, Set<number>>) => {
 	const neighborsMap = new Map(neighbors);
 	const { clusters, indexToCluster } = getInitialState(nodes);
 
@@ -153,7 +160,23 @@ const creationConnections = (
 	return connections;
 };
 
-export const createGame = (nodes: number) => {
+const getPositions = (
+	connections: Connection[],
+	width: number,
+	height: number,
+): GamePoint[] => {
+	const padding = 0.1;
+	const negativePadding = 1 - 2 * padding;
+	return connections.map((connection) => ({
+		connection,
+		position: {
+			x: Math.floor(Math.random() * width * negativePadding) + width * padding,
+			y: Math.floor(Math.random() * height * negativePadding) + width * padding,
+		},
+	}));
+};
+
+export const createGame = (nodes: number, width: number, height: number) => {
 	const rows = Math.ceil(Math.sqrt(nodes));
 	const columns = Math.ceil(nodes / rows);
 
@@ -164,5 +187,7 @@ export const createGame = (nodes: number) => {
 		]),
 	);
 
-	return creationConnections(nodes, neighbors);
+	const connections = getConnections(nodes, neighbors);
+
+	return getPositions(connections, width, height);
 };
