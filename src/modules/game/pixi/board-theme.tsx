@@ -14,11 +14,7 @@ const createBoardThemeContext = () => {
 		cursorGraphicsZIndex: 6,
 		cursorStrokeColor: 0xffffff,
 		cursorTextZIndex: 7,
-		fragmentBorderWidth: 4,
-		fragmentLockedZIndex: 0,
-		fragmentRemoteZIndex: 2,
-		fragmentSelectedZIndex: 3,
-		fragmentZIndex: 1,
+		nodeColor: 0xde3249,
 	};
 };
 

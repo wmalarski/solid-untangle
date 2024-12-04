@@ -20,15 +20,20 @@ const createGameStateContext = ({
 }: CreateGameStateContextArgs) => {
 	const [positions, setPositions] = createStore(initialPositions);
 
-	const setPosition = (point: number, position: Point2D) => {
+	const setPosition = (nodeId: string, position: Point2D) => {
 		setPositions(
 			produce((state) => {
-				state[point] = position;
+				state[nodeId] = position;
 			}),
 		);
 	};
 
-	return { connections, positions, setPosition };
+	const sendPosition = (_nodeId: string, _position: Point2D) => {
+		// send
+		// console.log("SEND POSITION", nodeId, position);
+	};
+
+	return { connections, positions, setPosition, sendPosition };
 };
 
 const GameStateContext = createContext<

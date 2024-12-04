@@ -1,5 +1,10 @@
-import { createEffect, type Component } from "solid-js";
+import { Graphics } from "pixi.js";
+import { createEffect, onCleanup, type Component } from "solid-js";
+import { useGameState } from "../contexts/game-state";
 import type { Point2D } from "../utils/types";
+import { useBoardTheme } from "./board-theme";
+import { usePixiContainer } from "./pixi-app";
+import { useDragObject } from "./use-drag-object";
 
 type GraphNodeProps = {
 	nodeId: string;
@@ -7,44 +12,27 @@ type GraphNodeProps = {
 };
 
 export const GraphNode: Component<GraphNodeProps> = (props) => {
-	createEffect(() => {
-		console.log("GraphNode", props.nodeId, props.position);
+	const store = useGameState();
+
+	const container = usePixiContainer();
+	const theme = useBoardTheme();
+
+	const graphics = new Graphics();
+
+	container.addChild(graphics);
+	onCleanup(() => {
+		container.removeChild(graphics);
 	});
-	// const store = usePuzzleStore();
-	// const selection = usePlayerSelection();
-	// const presence = usePlayerPresence();
 
-	// const container = usePixiContainer();
-	// const theme = useBoardTheme();
+	createEffect(() => {
+		graphics.clear();
+		graphics.circle(0, 0, 10).fill(theme().nodeColor);
+	});
 
-	// const fragment = new Container();
-
-	// onMount(() => {
-	// 	container.addChild(fragment);
-	// });
-
-	// onCleanup(() => {
-	// 	container.removeChild(fragment);
-	// });
-
-	// const center = createMemo(() => {
-	// 	return getCenterFromPoints(
-	// 		props.shape.curvePoints.map((point) => point.to),
-	// 	);
-	// });
-
-	// onMount(() => {
-	// 	const centerValue = center();
-	// 	fragment.pivot.set(-centerValue.x, -centerValue.y);
-	// });
-
-	// createEffect(() => {
-	// 	fragment.x = props.state.isLocked ? props.shape.min.x : props.state.x;
-	// });
-
-	// createEffect(() => {
-	// 	fragment.y = props.state.isLocked ? props.shape.min.y : props.state.y;
-	// });
+	createEffect(() => {
+		graphics.x = props.position.x;
+		graphics.y = props.position.y;
+	});
 
 	// const remotePlayerSelection = createMemo(() => {
 	// 	const remotePlayerId =
@@ -80,28 +68,21 @@ export const GraphNode: Component<GraphNodeProps> = (props) => {
 	// 				: theme.fragmentZIndex;
 	// });
 
-	// useDragObject({
-	// 	displayObject: fragment,
-	// 	onDragEnd: () => {
-	// 		store().setFragmentStateWithLockCheck({
-	// 			fragmentId: props.state.fragmentId,
-	// 			rotation: props.state.rotation,
-	// 			x: fragment.x,
-	// 			y: fragment.y,
-	// 		});
-	// 	},
-	// 	onDragMove: () => {
-	// 		store().sendFragmentState({
-	// 			fragmentId: props.state.fragmentId,
-	// 			rotation: props.state.rotation,
-	// 			x: fragment.x,
-	// 			y: fragment.y,
-	// 		});
-	// 	},
-	// 	onDragStart: () => {
-	// 		selection().select(props.state.fragmentId);
-	// 	},
-	// });
+	useDragObject({
+		displayObject: graphics,
+		onDragEnd: () => {
+			store().setPosition(props.nodeId, {
+				x: graphics.x,
+				y: graphics.y,
+			});
+		},
+		onDragMove: () => {
+			store().sendPosition(props.nodeId, {
+				x: graphics.x,
+				y: graphics.y,
+			});
+		},
+	});
 
 	return null;
 };
