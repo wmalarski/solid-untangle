@@ -7,7 +7,7 @@ import { usePixiContainer } from "../PixiApp";
 import { usePreventMenu } from "../usePreventMenu";
 import { useStageTransform } from "../useStageTransform";
 import { PuzzleFragment } from "./PuzzleFragment";
-import { RemoteCursors } from "./RemoteCursors";
+import { RemoteCursors } from "./remote-cursors";
 
 const useStageDeselect = () => {
 	const container = usePixiContainer();

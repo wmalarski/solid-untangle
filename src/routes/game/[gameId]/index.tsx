@@ -22,6 +22,7 @@ const MountedGameSection: Component = () => {
 		<GameBoard
 			connections={game().connections}
 			initialPositions={game().positions}
+			player={{ id: "123" }}
 		/>
 	);
 };
