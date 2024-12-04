@@ -8,6 +8,7 @@ import {
 } from "solid-js";
 import { GameBoard } from "~/modules/game/components/game-board";
 import { createGame } from "~/modules/game/utils/creator";
+import { Button } from "~/ui/button/button";
 
 export const route = {
 	load: async () => {
@@ -36,6 +37,7 @@ const GameSection: Component = () => {
 
 	return (
 		<Show when={isMounted()}>
+			<Button onClick={() => console.log(createGame(15, 100, 100))}>AA</Button>
 			<MountedGameSection />
 		</Show>
 	);

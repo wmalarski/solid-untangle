@@ -1,17 +1,15 @@
 import type { FederatedPointerEvent } from "pixi.js";
-import { type Component, For, onCleanup, onMount, Show } from "solid-js";
-import { usePlayerSelection } from "../../DataProviders/SelectionProvider";
-import { RIGHT_BUTTON } from "../constants";
+import { type Component, onCleanup, onMount } from "solid-js";
 import { useGameState } from "../contexts/game-state";
-import { usePixiContainer } from "../PixiApp";
-import { usePreventMenu } from "../usePreventMenu";
-import { useStageTransform } from "../useStageTransform";
-import { PuzzleFragment } from "./PuzzleFragment";
-import { RemoteCursors } from "./remote-cursors";
+import { useSelectionState } from "../contexts/selection-state";
+import { RIGHT_BUTTON } from "../utils/constants";
+import { usePixiContainer } from "./pixi-app";
+import { usePreventMenu } from "./use-prevent-menu";
+import { useStageTransform } from "./use-stage-transform";
 
 const useStageDeselect = () => {
 	const container = usePixiContainer();
-	const selection = usePlayerSelection();
+	const selection = useSelectionState();
 
 	const onPointerDown = (event: FederatedPointerEvent) => {
 		if (event.target === container && event.button !== RIGHT_BUTTON) {
@@ -37,18 +35,18 @@ export const GraphBoard: Component = () => {
 
 	return (
 		<>
-			<For each={Object.keys(store().positions)}>
+			{/* <For each={Object.keys(store().positions)}>
 				{(nodeId) => (
 					<Show when={store().positions[nodeId]}>
 						{(position) => (
 							<Show when={store().fragments[fragmentId]}>
-								{(state) => <PuzzleFragment shape={shape()} state={state()} />}
+								{(state) => <GraphNode shape={shape()} state={state()} />}
 							</Show>
 						)}
 					</Show>
 				)}
 			</For>
-			<RemoteCursors />
+			<RemoteCursors /> */}
 		</>
 	);
 };
