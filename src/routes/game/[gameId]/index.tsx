@@ -16,7 +16,7 @@ export const route = {
 } satisfies RouteDefinition;
 
 const MountedGameSection: Component = () => {
-	const game = createMemo(() => createGame(5, 1000, 1000));
+	const game = createMemo(() => createGame(40, 1000, 1000));
 
 	return (
 		<GameBoard
