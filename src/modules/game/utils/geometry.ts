@@ -1,34 +1,27 @@
-import type { Point2D } from "./types";
+import type { LineSection, Point2D } from "./types";
 
 export const subtractPoint = (point: Point2D, other: Point2D) => {
 	return { x: point.x - other.x, y: point.y - other.y };
 };
 
-export const getDistance = (point: Point2D, other: Point2D) => {
-	return Math.sqrt((point.x - other.x) ** 2 + (point.y - other.y) ** 2);
-};
+export const checkForCrossing = (first: LineSection, second: LineSection) => {
+	const det =
+		(first.end.x - first.start.x) * (second.end.y - second.start.y) -
+		(second.end.x - second.start.x) * (first.end.y - first.start.y);
 
-export const scaleBy = (point: Point2D, other: Point2D) => {
-	return { x: point.x * other.x, y: point.y * other.y };
-};
-
-export const getMinMaxFromPoints = (points: Point2D[]) => {
-	const xSorted = points.sort((a, b) => a.x - b.x);
-	const ySorted = points.sort((a, b) => a.y - b.y);
-	return {
-		max: { x: xSorted[xSorted.length - 1].x, y: ySorted[ySorted.length - 1].y },
-		min: { x: xSorted[0].x, y: ySorted[0].y },
-	};
-};
-
-export const getCenterFromPoints = (points: Point2D[]) => {
-	let sumX = 0;
-	let sumY = 0;
-
-	for (const { x, y } of points) {
-		sumX += x;
-		sumY += y;
+	if (det === 0) {
+		return false;
 	}
 
-	return { x: sumX / points.length, y: sumY / points.length };
+	const lambda =
+		((second.end.y - second.start.y) * (second.end.x - first.start.x) +
+			(second.start.x - second.end.x) * (second.end.y - first.start.y)) /
+		det;
+
+	const gamma =
+		((first.start.y - first.end.y) * (second.end.x - first.start.x) +
+			(first.end.x - first.start.x) * (second.end.y - first.start.y)) /
+		det;
+
+	return 0 < lambda && lambda < 1 && 0 < gamma && gamma < 1;
 };
