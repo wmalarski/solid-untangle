@@ -98,11 +98,20 @@ const getConnections = (neighbors: Map<string, Set<string>>) => {
 	const neighborsMap = new Map(neighbors);
 	const { clusters, indexToCluster } = getInitialState(neighbors);
 
+	const possibleConnectionsCount = Math.floor(
+		neighbors
+			.values()
+			.map((set) => set.size)
+			.reduce((previous, current) => previous + current) / 2,
+	);
+
+	const connectionsGoal = possibleConnectionsCount / 1.2;
+
 	const connections: Connection[] = [];
 
 	let queue = shuffle(Array.from(clusters.keys()));
 
-	while (queue.length > 1) {
+	while (queue.length > 1 || connections.length < connectionsGoal) {
 		const cluster = queue.pop();
 
 		if (!cluster) {
