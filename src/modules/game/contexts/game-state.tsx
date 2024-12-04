@@ -28,12 +28,12 @@ const createGameStateContext = ({
 		);
 	};
 
-	const sendPosition = (_nodeId: string, _position: Point2D) => {
+	const confirmPosition = (_nodeId: string, _position: Point2D) => {
 		// send
 		// console.log("SEND POSITION", nodeId, position);
 	};
 
-	return { connections, positions, setPosition, sendPosition };
+	return { connections, positions, setPosition, confirmPosition };
 };
 
 const GameStateContext = createContext<

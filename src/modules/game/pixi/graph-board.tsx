@@ -1,8 +1,9 @@
 import type { FederatedPointerEvent } from "pixi.js";
-import { type Component, For, onCleanup, onMount, Show } from "solid-js";
+import { type Component, For, onCleanup, onMount } from "solid-js";
 import { useGameState } from "../contexts/game-state";
 import { useSelectionState } from "../contexts/selection-state";
 import { RIGHT_BUTTON } from "../utils/constants";
+import { GraphEdge } from "./graph-edge";
 import { GraphNode } from "./graph-node";
 import { usePixiContainer } from "./pixi-app";
 import { usePreventMenu } from "./use-prevent-menu";
@@ -36,11 +37,17 @@ export const GraphBoard: Component = () => {
 
 	return (
 		<>
+			<For each={store().connections}>
+				{(connection) => (
+					<GraphEdge
+						startPosition={store().positions[connection.start]}
+						endPosition={store().positions[connection.end]}
+					/>
+				)}
+			</For>
 			<For each={Object.keys(store().positions)}>
 				{(nodeId) => (
-					<Show when={store().positions[nodeId]}>
-						{(position) => <GraphNode nodeId={nodeId} position={position()} />}
-					</Show>
+					<GraphNode nodeId={nodeId} position={store().positions[nodeId]} />
 				)}
 			</For>
 			{/* <RemoteCursors /> */}

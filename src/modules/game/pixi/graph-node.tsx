@@ -34,50 +34,16 @@ export const GraphNode: Component<GraphNodeProps> = (props) => {
 		graphics.y = props.position.y;
 	});
 
-	// const remotePlayerSelection = createMemo(() => {
-	// 	const remotePlayerId =
-	// 		selection().fragmentSelection()[props.state.fragmentId];
-	// 	if (!remotePlayerId) {
-	// 		return null;
-	// 	}
-
-	// 	const remotePlayer = presence().players[remotePlayerId];
-	// 	if (!remotePlayer) {
-	// 		return null;
-	// 	}
-
-	// 	return remotePlayer;
-	// });
-
-	// createEffect(() => {
-	// 	const shouldBeBlocked = props.state.isLocked || remotePlayerSelection();
-	// 	fragment.eventMode = shouldBeBlocked ? "none" : "static";
-	// });
-
-	// const isCurrentPlayerSelected = createMemo(() => {
-	// 	return props.state.fragmentId === selection().selectedId();
-	// });
-
-	// createEffect(() => {
-	// 	fragment.zIndex = props.state.isLocked
-	// 		? theme.fragmentLockedZIndex
-	// 		: isCurrentPlayerSelected()
-	// 			? theme.fragmentSelectedZIndex
-	// 			: remotePlayerSelection()
-	// 				? theme.fragmentRemoteZIndex
-	// 				: theme.fragmentZIndex;
-	// });
-
 	useDragObject({
 		displayObject: graphics,
 		onDragEnd: () => {
-			store().setPosition(props.nodeId, {
+			store().confirmPosition(props.nodeId, {
 				x: graphics.x,
 				y: graphics.y,
 			});
 		},
 		onDragMove: () => {
-			store().sendPosition(props.nodeId, {
+			store().setPosition(props.nodeId, {
 				x: graphics.x,
 				y: graphics.y,
 			});
