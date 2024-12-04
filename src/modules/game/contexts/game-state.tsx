@@ -3,6 +3,7 @@ import {
 	type Component,
 	createContext,
 	createMemo,
+	createSignal,
 	type ParentProps,
 	useContext,
 } from "solid-js";
@@ -43,6 +44,7 @@ const createGameStateContext = ({
 }: CreateGameStateContextArgs) => {
 	const [positions, setPositions] = createStore(initialPositions);
 	const connectionPairs = getConnectionPairs(connections);
+	const [hasEnded, setHasEnded] = createSignal(false);
 
 	const setPosition = (nodeId: string, position: Point2D) => {
 		setPositions(
@@ -54,13 +56,10 @@ const createGameStateContext = ({
 
 	const confirmPosition = (_nodeId: string, _position: Point2D) => {
 		const hasCrossing = detectCrossing(connectionPairs, positions);
-
-		console.log("hasCrossing", hasCrossing);
-		// send
-		// console.log("SEND POSITION", nodeId, position);
+		setHasEnded(!hasCrossing);
 	};
 
-	return { connections, positions, setPosition, confirmPosition };
+	return { connections, positions, setPosition, confirmPosition, hasEnded };
 };
 
 const GameStateContext = createContext<

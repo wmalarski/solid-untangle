@@ -32,6 +32,9 @@ importers:
       '@solidjs/start':
         specifier: 1.0.10
         version: 1.0.10(solid-js@1.9.3)(vinxi@0.4.3(@types/node@22.8.2)(ioredis@5.4.1)(lightningcss@1.28.2)(terser@5.36.0)(typescript@5.6.3))(vite@5.4.11(@types/node@22.8.2)(lightningcss@1.28.2)(terser@5.36.0))
+      canvas-confetti:
+        specifier: ^1.9.3
+        version: 1.9.3
       class-variance-authority:
         specifier: 0.7.1
         version: 0.7.1
@@ -66,6 +69,9 @@ importers:
       '@biomejs/biome':
         specifier: 1.9.4
         version: 1.9.4
+      '@types/canvas-confetti':
+        specifier: ^1.6.4
+        version: 1.6.4
       autoprefixer:
         specifier: ^10.4.20
         version: 10.4.20(postcss@8.4.49)
@@ -1128,6 +1134,9 @@ packages:
   '@types/braces@3.0.4':
     resolution: {integrity: sha512-0WR3b8eaISjEW7RpZnclONaLFDf7buaowRHdqLp4vLj54AsSAYWfh3DRbfiYJY9XDxMgx1B4sE1Afw2PGpuHOA==}
 
+  '@types/canvas-confetti@1.6.4':
+    resolution: {integrity: sha512-fNyZ/Fdw/Y92X0vv7B+BD6ysHL4xVU5dJcgzgxLdGbn8O3PezZNIJpml44lKM0nsGur+o/6+NZbZeNTt00U1uA==}
+
   '@types/css-font-loading-module@0.0.12':
     resolution: {integrity: sha512-x2tZZYkSxXqWvTDgveSynfjq/T2HyiZHXb00j/+gy19yp70PHCizM48XFdjBCWH7eHBD0R5i/pw9yMBP/BH5uA==}
 
@@ -1368,6 +1377,9 @@ packages:
 
   caniuse-lite@1.0.30001685:
     resolution: {integrity: sha512-e/kJN1EMyHQzgcMEEgoo+YTCO1NGCmIYHk5Qk8jT6AazWemS5QFKJ5ShCJlH3GZrNIdZofcNCEwZqbMjjKzmnA==}
+
+  canvas-confetti@1.9.3:
+    resolution: {integrity: sha512-rFfTURMvmVEX1gyXFgn5QMn81bYk70qa0HLzcIOSVEyl57n6o9ItHeBtUSWdvKAPY0xlvBHno4/v3QPrT83q9g==}
 
   chalk@5.3.0:
     resolution: {integrity: sha512-dLitG79d+GV1Nb/VYcCDFivJeK1hiukt9QjRNVOsUtTy1rR1YJsmpGGTZ3qJos+uw7WmWF4wUwBd9jxjocFC2w==}
@@ -3920,6 +3932,8 @@ snapshots:
 
   '@types/braces@3.0.4': {}
 
+  '@types/canvas-confetti@1.6.4': {}
+
   '@types/css-font-loading-module@0.0.12': {}
 
   '@types/earcut@2.1.4': {}
@@ -4220,6 +4234,8 @@ snapshots:
   camelcase@7.0.1: {}
 
   caniuse-lite@1.0.30001685: {}
+
+  canvas-confetti@1.9.3: {}
 
   chalk@5.3.0: {}
 

@@ -13,6 +13,7 @@
 	"type": "module",
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
+		"@types/canvas-confetti": "^1.6.4",
 		"autoprefixer": "^10.4.20",
 		"daisyui": "4.12.14",
 		"postcss": "^8.4.49",
@@ -27,6 +28,7 @@
 		"@solidjs/meta": "0.29.4",
 		"@solidjs/router": "0.15.1",
 		"@solidjs/start": "1.0.10",
+		"canvas-confetti": "^1.9.3",
 		"class-variance-authority": "0.7.1",
 		"cookie-es": "^1.2.2",
 		"decode-formdata": "0.8.0",

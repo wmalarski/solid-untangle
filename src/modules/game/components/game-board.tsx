@@ -5,6 +5,7 @@ import { GameStateProvider } from "../contexts/game-state";
 import { SelectionStateProvider } from "../contexts/selection-state";
 import { PixiStage } from "../pixi/pixi-stage";
 import type { Connection, Point2D } from "../utils/types";
+import { SuccessConfetti } from "./success-confetti";
 
 const ClientBoard: Component = () => {
 	const [canvas, setCanvas] = createSignal<HTMLCanvasElement>();
@@ -38,6 +39,7 @@ export const GameBoard: Component<GameBoardProps> = (props) => {
 					initialPositions={props.initialPositions}
 				>
 					<ClientBoard />
+					<SuccessConfetti />
 				</GameStateProvider>
 			</SelectionStateProvider>
 		</CursorsStateProvider>
