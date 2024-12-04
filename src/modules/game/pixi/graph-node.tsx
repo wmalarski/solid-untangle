@@ -1,6 +1,7 @@
 import { Graphics } from "pixi.js";
-import { createEffect, onCleanup, type Component } from "solid-js";
+import { createEffect, createMemo, onCleanup, type Component } from "solid-js";
 import { useGameState } from "../contexts/game-state";
+import { useSelectionState } from "../contexts/selection-state";
 import type { Point2D } from "../utils/types";
 import { useBoardTheme } from "./board-theme";
 import { usePixiContainer } from "./pixi-app";
@@ -13,6 +14,7 @@ type GraphNodeProps = {
 
 export const GraphNode: Component<GraphNodeProps> = (props) => {
 	const store = useGameState();
+	const selection = useSelectionState();
 
 	const container = usePixiContainer();
 	const theme = useBoardTheme();
@@ -24,9 +26,18 @@ export const GraphNode: Component<GraphNodeProps> = (props) => {
 		container.removeChild(graphics);
 	});
 
+	const isNodeSelected = createMemo(
+		() => props.nodeId === selection().selectedId(),
+	);
+
 	createEffect(() => {
+		const isSelected = isNodeSelected();
+		const { nodeColor, nodeSelectedColor } = theme();
+
 		graphics.clear();
-		graphics.circle(0, 0, 10).fill(theme().nodeColor);
+		graphics
+			.circle(0, 0, isSelected ? 11 : 10)
+			.fill(isSelected ? nodeSelectedColor : nodeColor);
 	});
 
 	createEffect(() => {
@@ -37,6 +48,7 @@ export const GraphNode: Component<GraphNodeProps> = (props) => {
 	useDragObject({
 		displayObject: graphics,
 		onDragEnd: () => {
+			selection().select(null);
 			store().confirmPosition(props.nodeId, {
 				x: graphics.x,
 				y: graphics.y,
@@ -47,6 +59,9 @@ export const GraphNode: Component<GraphNodeProps> = (props) => {
 				x: graphics.x,
 				y: graphics.y,
 			});
+		},
+		onDragStart: () => {
+			selection().select(props.nodeId);
 		},
 	});
 

@@ -40,6 +40,7 @@ export const GraphBoard: Component = () => {
 			<For each={store().connections}>
 				{(connection) => (
 					<GraphEdge
+						connection={connection}
 						startPosition={store().positions[connection.start]}
 						endPosition={store().positions[connection.end]}
 					/>

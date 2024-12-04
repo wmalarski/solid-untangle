@@ -1,15 +1,19 @@
 import { Graphics } from "pixi.js";
-import { createEffect, onCleanup, type Component } from "solid-js";
-import type { Point2D } from "../utils/types";
+import { createEffect, createMemo, onCleanup, type Component } from "solid-js";
+import { useSelectionState } from "../contexts/selection-state";
+import type { Connection, Point2D } from "../utils/types";
 import { useBoardTheme } from "./board-theme";
 import { usePixiContainer } from "./pixi-app";
 
 type GraphEdgeProps = {
+	connection: Connection;
 	startPosition: Point2D;
 	endPosition: Point2D;
 };
 
 export const GraphEdge: Component<GraphEdgeProps> = (props) => {
+	const selection = useSelectionState();
+
 	const container = usePixiContainer();
 	const theme = useBoardTheme();
 
@@ -20,12 +24,24 @@ export const GraphEdge: Component<GraphEdgeProps> = (props) => {
 		container.removeChild(graphics);
 	});
 
+	const isEdgeSelected = createMemo(
+		() =>
+			props.connection.start === selection().selectedId() ||
+			props.connection.end === selection().selectedId(),
+	);
+
 	createEffect(() => {
+		const isSelected = isEdgeSelected();
+		const { nodeColor, nodeSelectedColor } = theme();
+
 		graphics.clear();
 		graphics
 			.moveTo(props.startPosition.x, props.startPosition.y)
 			.lineTo(props.endPosition.x, props.endPosition.y)
-			.stroke(theme().nodeColor);
+			.stroke({
+				color: isSelected ? nodeSelectedColor : nodeColor,
+				width: isSelected ? 2 : 1,
+			});
 	});
 
 	return null;
