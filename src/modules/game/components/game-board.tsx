@@ -25,7 +25,7 @@ const ClientBoard: Component = () => {
 
 type GameBoardProps = {
 	connections: Connection[];
-	initialPositions: Point2D[];
+	initialPositions: Record<string, Point2D>;
 	player: Player;
 };
 

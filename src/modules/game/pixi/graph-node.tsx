@@ -1,11 +1,15 @@
-import type { Component } from "solid-js";
+import { createEffect, type Component } from "solid-js";
 import type { Point2D } from "../utils/types";
 
 type GraphNodeProps = {
-	state: Point2D;
+	nodeId: string;
+	position: Point2D;
 };
 
 export const GraphNode: Component<GraphNodeProps> = (props) => {
+	createEffect(() => {
+		console.log("GraphNode", props.nodeId, props.position);
+	});
 	// const store = usePuzzleStore();
 	// const selection = usePlayerSelection();
 	// const presence = usePlayerPresence();

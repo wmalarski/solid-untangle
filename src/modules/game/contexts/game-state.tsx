@@ -11,17 +11,14 @@ import type { Connection, Point2D } from "../utils/types";
 
 type CreateGameStateContextArgs = {
 	connections: Connection[];
-	initialPositions: Point2D[];
+	initialPositions: Record<string, Point2D>;
 };
 
 const createGameStateContext = ({
 	connections,
 	initialPositions,
 }: CreateGameStateContextArgs) => {
-	const initial = Object.fromEntries(
-		initialPositions.map((position, index) => [index, position]),
-	);
-	const [positions, setPositions] = createStore(initial);
+	const [positions, setPositions] = createStore(initialPositions);
 
 	const setPosition = (point: number, position: Point2D) => {
 		setPositions(

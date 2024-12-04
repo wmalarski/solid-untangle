@@ -32,26 +32,40 @@ const getNeighbors = (
 	return uniqueNeighbors;
 };
 
-const getInitialState = (nodes: number) => {
-	const initialMap = Array.from({ length: nodes }).map((_value, index) => ({
+const mapNeighborsToStringIds = (neighbors: Set<number>[]) => {
+	const ids = Array.from({ length: neighbors.length }, nanoid);
+
+	const result = new Map<string, Set<string>>();
+
+	neighbors.forEach((nodes, index) => {
+		const nodeId = ids[index];
+		const mappedSet = new Set([...nodes].map((index) => ids[index]));
+		result.set(nodeId, mappedSet);
+	});
+
+	return result;
+};
+
+const getInitialState = (neighbors: Map<string, Set<string>>) => {
+	const keys = Array.from(neighbors.keys());
+
+	const initialMap = keys.map((node) => ({
 		id: nanoid(),
-		index,
+		node,
 	}));
 
 	const indexToCluster = new Map(
-		initialMap.map((entry) => [entry.index, entry.id]),
+		initialMap.map((entry) => [entry.node, entry.id]),
 	);
 
-	const clusters = new Map(
-		initialMap.map((entry) => [entry.id, [entry.index]]),
-	);
+	const clusters = new Map(initialMap.map((entry) => [entry.id, [entry.node]]));
 
 	return { indexToCluster, clusters };
 };
 
 const getPossibleConnections = (
-	nodes: number[],
-	neighbors: Map<number, Set<number>>,
+	nodes: string[],
+	neighbors: Map<string, Set<string>>,
 ) => {
 	const connections: Connection[] = [];
 
@@ -80,9 +94,9 @@ const shuffle = <T>(list: T[]) => {
 		.map(({ value }) => value);
 };
 
-const getConnections = (nodes: number, neighbors: Map<number, Set<number>>) => {
+const getConnections = (neighbors: Map<string, Set<string>>) => {
 	const neighborsMap = new Map(neighbors);
-	const { clusters, indexToCluster } = getInitialState(nodes);
+	const { clusters, indexToCluster } = getInitialState(neighbors);
 
 	const connections: Connection[] = [];
 
@@ -147,31 +161,39 @@ const getConnections = (nodes: number, neighbors: Map<number, Set<number>>) => {
 };
 
 const getPositions = (
-	nodes: number,
+	nodeIds: string[],
 	width: number,
 	height: number,
-): Point2D[] => {
+): Record<string, Point2D> => {
 	const padding = 0.1;
 	const negativePadding = 1 - 2 * padding;
-	return Array.from({ length: nodes }, () => ({
-		x: Math.floor(Math.random() * width * negativePadding) + width * padding,
-		y: Math.floor(Math.random() * height * negativePadding) + width * padding,
-	}));
+	return Object.fromEntries(
+		nodeIds.map((nodeId) => [
+			nodeId,
+			{
+				x:
+					Math.floor(Math.random() * width * negativePadding) + width * padding,
+				y:
+					Math.floor(Math.random() * height * negativePadding) +
+					width * padding,
+			},
+		]),
+	);
 };
 
 export const createGame = (nodes: number, width: number, height: number) => {
 	const rows = Math.ceil(Math.sqrt(nodes));
 	const columns = Math.ceil(nodes / rows);
 
-	const neighbors = new Map(
-		Array.from({ length: nodes }).map((_value, index) => [
-			index,
-			getNeighbors(index, rows, columns, nodes),
-		]),
+	const indexedNeighbors = Array.from({ length: nodes }).map((_value, index) =>
+		getNeighbors(index, rows, columns, nodes),
 	);
 
-	const connections = getConnections(nodes, neighbors);
-	const positions = getPositions(nodes, width, height);
+	const neighbors = mapNeighborsToStringIds(indexedNeighbors);
+
+	const connections = getConnections(neighbors);
+	const nodeIds = Array.from(neighbors.keys());
+	const positions = getPositions(nodeIds, width, height);
 
 	return { connections, positions };
 };

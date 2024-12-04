@@ -1,6 +1,6 @@
 export type Connection = {
-	start: number;
-	end: number;
+	start: string;
+	end: string;
 };
 
 export type Point2D = {
