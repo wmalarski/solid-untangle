@@ -35,6 +35,7 @@ export const GraphNode: Component<GraphNodeProps> = (props) => {
 		const { nodeColor, nodeSelectedColor } = theme();
 
 		graphics.clear();
+		graphics.circle(0, 0, 20).fill({ color: 0x000000, alpha: 0 });
 		graphics
 			.circle(0, 0, isSelected ? 11 : 10)
 			.fill(isSelected ? nodeSelectedColor : nodeColor);
