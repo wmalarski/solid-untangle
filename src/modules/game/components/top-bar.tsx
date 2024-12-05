@@ -9,6 +9,7 @@ import {
 	TooltipRoot,
 	TooltipTrigger,
 } from "~/ui/tooltip/tooltip";
+import { AvatarsDialog } from "./avatars-dialog";
 
 const ShareButton: Component = () => {
 	const { t } = useI18n();
@@ -63,7 +64,7 @@ export const TopBar: Component = () => {
 					<ShareButton />
 				</div>
 			</div>
-			{/* <AvatarsDialog /> */}
+			<AvatarsDialog />
 		</div>
 	);
 };

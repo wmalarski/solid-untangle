@@ -59,6 +59,9 @@ const enDict = {
 			startAgain: "Start Again",
 			title: "Congratulations!",
 		},
+		topBar: {
+			players: "Players",
+		},
 	},
 };
 

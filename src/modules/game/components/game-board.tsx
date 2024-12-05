@@ -2,6 +2,7 @@ import { createSignal, Show, Suspense, type Component } from "solid-js";
 import type { Player } from "~/modules/player/server/server";
 import { CursorsStateProvider } from "../contexts/cursors-state";
 import { GameStateProvider } from "../contexts/game-state";
+import { PresenceStateProvider } from "../contexts/presence-state";
 import { SelectionStateProvider } from "../contexts/selection-state";
 import { PixiStage } from "../pixi/pixi-stage";
 import type { Connection, Point2D } from "../utils/types";
@@ -32,24 +33,27 @@ type GameBoardProps = {
 	initialPositions: Record<string, Point2D>;
 	onGameReload: (nodes: number) => void;
 	player: Player;
+	gameId: string;
 };
 
 export const GameBoard: Component<GameBoardProps> = (props) => {
 	return (
-		<CursorsStateProvider playerId={props.player.id}>
-			<SelectionStateProvider playerId={props.player.id}>
-				<GameStateProvider
-					connections={props.connections}
-					initialPositions={props.initialPositions}
-					onGameReload={props.onGameReload}
-				>
-					<ClientBoard />
-					<InfoBar />
-					<TopBar />
-					<SuccessConfetti />
-					<ReloadDialog />
-				</GameStateProvider>
-			</SelectionStateProvider>
-		</CursorsStateProvider>
+		<PresenceStateProvider gameId={props.gameId} player={props.player}>
+			<CursorsStateProvider playerId={props.player.id}>
+				<SelectionStateProvider playerId={props.player.id}>
+					<GameStateProvider
+						connections={props.connections}
+						initialPositions={props.initialPositions}
+						onGameReload={props.onGameReload}
+					>
+						<ClientBoard />
+						<InfoBar />
+						<TopBar />
+						<SuccessConfetti />
+						<ReloadDialog />
+					</GameStateProvider>
+				</SelectionStateProvider>
+			</CursorsStateProvider>
+		</PresenceStateProvider>
 	);
 };

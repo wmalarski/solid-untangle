@@ -1,16 +1,30 @@
 import { createWritableMemo } from "@solid-primitives/memo";
-import type { RouteDefinition } from "@solidjs/router";
-import { type Component, createSignal, onMount, Show } from "solid-js";
+import { createAsync, useParams, type RouteDefinition } from "@solidjs/router";
+import {
+	createSignal,
+	onMount,
+	Show,
+	Suspense,
+	type Component,
+} from "solid-js";
 import { GameBoard } from "~/modules/game/components/game-board";
 import { createGame } from "~/modules/game/utils/creator";
+import { getPlayerLoader } from "~/modules/player/server/client";
+import type { Player } from "~/modules/player/server/server";
 
 export const route = {
 	load: async () => {
-		await Promise.resolve();
+		await getPlayerLoader();
 	},
 } satisfies RouteDefinition;
 
-const MountedGameSection: Component = () => {
+type GameSectionProps = {
+	player: Player;
+};
+
+const MountedGameSection: Component<GameSectionProps> = (props) => {
+	const params = useParams();
+
 	const [game, setGame] = createWritableMemo(() => createGame(10));
 
 	const onGameReload = (nodes: number) => {
@@ -19,15 +33,16 @@ const MountedGameSection: Component = () => {
 
 	return (
 		<GameBoard
+			gameId={params.gameId}
 			connections={game().connections}
 			initialPositions={game().positions}
-			player={{ id: "123" }}
+			player={props.player}
 			onGameReload={onGameReload}
 		/>
 	);
 };
 
-const GameSection: Component = () => {
+const GameSection: Component<GameSectionProps> = (props) => {
 	const [isMounted, setIsMounted] = createSignal(false);
 
 	onMount(() => {
@@ -36,15 +51,21 @@ const GameSection: Component = () => {
 
 	return (
 		<Show when={isMounted()}>
-			<MountedGameSection />
+			<MountedGameSection player={props.player} />
 		</Show>
 	);
 };
 
 export default function GamePage() {
+	const player = createAsync(() => getPlayerLoader());
+
 	return (
 		<main>
-			<GameSection />
+			<Suspense>
+				<Show when={player()}>
+					{(player) => <GameSection player={player()} />}
+				</Show>
+			</Suspense>
 		</main>
 	);
 }
