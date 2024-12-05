@@ -14,8 +14,8 @@ const createBoardThemeContext = () => {
 		cursorGraphicsZIndex: 6,
 		cursorStrokeColor: 0xffffff,
 		cursorTextZIndex: 7,
-		nodeColor: 0xde3249,
-		nodeSelectedColor: 0xff545a,
+		nodeColor: 0xff6f98,
+		nodeSelectedColor: 0xff86a6,
 	};
 };
 

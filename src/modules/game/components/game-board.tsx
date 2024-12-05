@@ -5,7 +5,10 @@ import { GameStateProvider } from "../contexts/game-state";
 import { SelectionStateProvider } from "../contexts/selection-state";
 import { PixiStage } from "../pixi/pixi-stage";
 import type { Connection, Point2D } from "../utils/types";
+import { InfoBar } from "./info-bar";
+import { ReloadDialog } from "./reload-dialog";
 import { SuccessConfetti } from "./success-confetti";
+import { TopBar } from "./top-bar";
 
 const ClientBoard: Component = () => {
 	const [canvas, setCanvas] = createSignal<HTMLCanvasElement>();
@@ -27,6 +30,7 @@ const ClientBoard: Component = () => {
 type GameBoardProps = {
 	connections: Connection[];
 	initialPositions: Record<string, Point2D>;
+	onGameReload: (nodes: number) => void;
 	player: Player;
 };
 
@@ -37,9 +41,13 @@ export const GameBoard: Component<GameBoardProps> = (props) => {
 				<GameStateProvider
 					connections={props.connections}
 					initialPositions={props.initialPositions}
+					onGameReload={props.onGameReload}
 				>
 					<ClientBoard />
+					<InfoBar />
+					<TopBar />
 					<SuccessConfetti />
+					<ReloadDialog />
 				</GameStateProvider>
 			</SelectionStateProvider>
 		</CursorsStateProvider>

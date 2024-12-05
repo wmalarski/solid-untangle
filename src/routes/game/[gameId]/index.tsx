@@ -1,11 +1,6 @@
+import { createWritableMemo } from "@solid-primitives/memo";
 import type { RouteDefinition } from "@solidjs/router";
-import {
-	type Component,
-	createMemo,
-	createSignal,
-	onMount,
-	Show,
-} from "solid-js";
+import { type Component, createSignal, onMount, Show } from "solid-js";
 import { GameBoard } from "~/modules/game/components/game-board";
 import { createGame } from "~/modules/game/utils/creator";
 
@@ -16,13 +11,18 @@ export const route = {
 } satisfies RouteDefinition;
 
 const MountedGameSection: Component = () => {
-	const game = createMemo(() => createGame(10, 1000, 1000));
+	const [game, setGame] = createWritableMemo(() => createGame(10));
+
+	const onGameReload = (nodes: number) => {
+		setGame(createGame(nodes));
+	};
 
 	return (
 		<GameBoard
 			connections={game().connections}
 			initialPositions={game().positions}
 			player={{ id: "123" }}
+			onGameReload={onGameReload}
 		/>
 	);
 };

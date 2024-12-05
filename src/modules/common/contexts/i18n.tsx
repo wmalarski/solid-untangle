@@ -49,6 +49,16 @@ const enDict = {
 			zoomIn: "Zoom in",
 			zoomOut: "Zoom out",
 		},
+		share: {
+			copy: "Link copied to your clipboard",
+			title: "Share link",
+		},
+		reload: {
+			description: "Do you want to play again?",
+			error: "Error",
+			startAgain: "Start Again",
+			title: "Congratulations!",
+		},
 	},
 };
 

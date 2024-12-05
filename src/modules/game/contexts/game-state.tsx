@@ -36,11 +36,13 @@ const detectCrossing = (
 type CreateGameStateContextArgs = {
 	connections: Connection[];
 	initialPositions: Record<string, Point2D>;
+	onGameReload: (nodes: number) => void;
 };
 
 const createGameStateContext = ({
 	connections,
 	initialPositions,
+	onGameReload,
 }: CreateGameStateContextArgs) => {
 	const [positions, setPositions] = createStore(initialPositions);
 	const connectionPairs = getConnectionPairs(connections);
@@ -59,7 +61,19 @@ const createGameStateContext = ({
 		setHasEnded(!hasCrossing);
 	};
 
-	return { connections, positions, setPosition, confirmPosition, hasEnded };
+	const startNewGame = (nodes: number) => {
+		setHasEnded(false);
+		onGameReload(nodes);
+	};
+
+	return {
+		connections,
+		positions,
+		setPosition,
+		confirmPosition,
+		hasEnded,
+		startNewGame,
+	};
 };
 
 const GameStateContext = createContext<
@@ -75,6 +89,7 @@ export const GameStateProvider: Component<GameStateProviderProps> = (props) => {
 		createGameStateContext({
 			connections: props.connections,
 			initialPositions: props.initialPositions,
+			onGameReload: props.onGameReload,
 		}),
 	);
 

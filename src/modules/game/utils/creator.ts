@@ -190,7 +190,9 @@ const getPositions = (
 	);
 };
 
-export const createGame = (nodes: number, width: number, height: number) => {
+export const createGame = (nodes: number) => {
+	const width = 1000;
+	const height = 1000;
 	const rows = Math.ceil(Math.sqrt(nodes));
 	const columns = Math.ceil(nodes / rows);
 

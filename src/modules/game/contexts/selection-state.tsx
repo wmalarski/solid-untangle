@@ -35,8 +35,8 @@ const createSelectionState = (_playerId: string) => {
 		);
 	});
 
-	const sendBroadcast = throttle((selectionId: null | string) => {
-		console.log("SELECTION-SEND", selectionId);
+	const sendBroadcast = throttle((_selectionId: null | string) => {
+		// console.log("SELECTION-SEND", selectionId);
 	}, REALTIME_THROTTLE_TIME);
 
 	const select = (selectionId: null | string) => {
