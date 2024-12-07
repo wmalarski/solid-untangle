@@ -1,6 +1,8 @@
+import { useSubmission } from "@solidjs/router";
 import { nanoid } from "nanoid";
 import { type Component, Show } from "solid-js";
 import { useI18n } from "~/modules/common/contexts/i18n";
+import { setPlayerDetailAction } from "~/modules/player/server/client";
 import { Button } from "~/ui/button/button";
 import {
 	TextFieldErrorMessage,
@@ -17,19 +19,18 @@ const PlayerForm: Component = () => {
 	const defaultPlayerId = nanoid();
 	const defaultPlayerColor = randomHexColor();
 
+	const submission = useSubmission(setPlayerDetailAction);
+
 	return (
-		<form action={setBoardAccessAction} class="flex flex-col gap-4">
-			<input name="boardId" type="hidden" value={props.board.id} />
-			<input name="playerColor" type="hidden" value={defaultPlayerColor} />
-			<input name="playerId" type="hidden" value={defaultPlayerId} />
+		<form action={setPlayerDetailAction} class="flex flex-col gap-4">
+			<input name="id" type="hidden" value={defaultPlayerId} />
 			<TextFieldRoot>
 				<TextFieldLabel for="userName">
 					<TextFieldLabelText>{t("invite.username.label")}</TextFieldLabelText>
 				</TextFieldLabel>
 				<TextFieldInput
 					disabled={submission.pending}
-					id="userName"
-					minLength={ACCESS_USERNAME_MIN_LENGTH}
+					id="name"
 					name="userName"
 					placeholder={t("invite.username.placeholder")}
 					variant="bordered"
