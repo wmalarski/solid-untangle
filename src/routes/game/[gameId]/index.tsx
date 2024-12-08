@@ -1,6 +1,7 @@
 import { createWritableMemo } from "@solid-primitives/memo";
 import { createAsync, useParams, type RouteDefinition } from "@solidjs/router";
 import {
+	createEffect,
 	createSignal,
 	onMount,
 	Show,
@@ -58,6 +59,10 @@ const GameSection: Component<GameSectionProps> = (props) => {
 
 export default function GamePage() {
 	const player = createAsync(() => getPlayerLoader());
+
+	createEffect(() => {
+		console.log("player()", player());
+	});
 
 	return (
 		<main>

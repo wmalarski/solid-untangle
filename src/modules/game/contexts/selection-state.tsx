@@ -10,6 +10,7 @@ import {
 } from "solid-js";
 import { createStore, produce } from "solid-js/store";
 import { REALTIME_THROTTLE_TIME } from "../utils/constants";
+import { usePresenceState } from "./presence-state";
 
 type SelectionState = Record<string, null | string | undefined>;
 
@@ -87,14 +88,9 @@ const SelectionStateContext = createContext<
 	throw new Error("SelectionStateContext is not defined");
 });
 
-type SelectionStateProviderProps = ParentProps<{
-	playerId: string;
-}>;
-
-export const SelectionStateProvider: Component<SelectionStateProviderProps> = (
-	props,
-) => {
-	const value = createMemo(() => createSelectionState(props.playerId));
+export const SelectionStateProvider: Component<ParentProps> = (props) => {
+	const presence = usePresenceState();
+	const value = createMemo(() => createSelectionState(presence().player.id));
 
 	return (
 		<SelectionStateContext.Provider value={value}>

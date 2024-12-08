@@ -9,6 +9,7 @@ import {
 } from "solid-js";
 import { createStore, produce } from "solid-js/store";
 import { REALTIME_THROTTLE_TIME } from "../utils/constants";
+import { usePresenceState } from "./presence-state";
 
 type PlayerCursorState = {
 	x: number;
@@ -68,14 +69,9 @@ const CursorsStateContext = createContext<
 	throw new Error("CursorsStateContext not defined");
 });
 
-type CursorsStateProviderProps = ParentProps<{
-	playerId: string;
-}>;
-
-export const CursorsStateProvider: Component<CursorsStateProviderProps> = (
-	props,
-) => {
-	const value = createMemo(() => createCursorsState(props.playerId));
+export const CursorsStateProvider: Component<ParentProps> = (props) => {
+	const presence = usePresenceState();
+	const value = createMemo(() => createCursorsState(presence().player.id));
 
 	return (
 		<CursorsStateContext.Provider value={value}>

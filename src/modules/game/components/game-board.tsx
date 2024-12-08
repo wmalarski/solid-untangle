@@ -7,6 +7,7 @@ import { SelectionStateProvider } from "../contexts/selection-state";
 import { PixiStage } from "../pixi/pixi-stage";
 import type { Connection, Point2D } from "../utils/types";
 import { InfoBar } from "./info-bar";
+import { PlayerDialog } from "./player-dialog";
 import { ReloadDialog } from "./reload-dialog";
 import { SuccessConfetti } from "./success-confetti";
 import { TopBar } from "./top-bar";
@@ -39,8 +40,8 @@ type GameBoardProps = {
 export const GameBoard: Component<GameBoardProps> = (props) => {
 	return (
 		<PresenceStateProvider gameId={props.gameId} player={props.player}>
-			<CursorsStateProvider playerId={props.player.id}>
-				<SelectionStateProvider playerId={props.player.id}>
+			<CursorsStateProvider>
+				<SelectionStateProvider>
 					<GameStateProvider
 						connections={props.connections}
 						initialPositions={props.initialPositions}
@@ -49,8 +50,9 @@ export const GameBoard: Component<GameBoardProps> = (props) => {
 						<ClientBoard />
 						<InfoBar />
 						<TopBar />
-						<SuccessConfetti />
 						<ReloadDialog />
+						<PlayerDialog />
+						<SuccessConfetti />
 					</GameStateProvider>
 				</SelectionStateProvider>
 			</CursorsStateProvider>
