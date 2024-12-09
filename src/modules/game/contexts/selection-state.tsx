@@ -7,7 +7,7 @@ import {
 	type ParentProps,
 	useContext,
 } from "solid-js";
-import { usePresenceState } from "./presence-state";
+import { useGameConfig } from "./game-config";
 
 const createSelectionState = (_playerId: string) => {
 	const [selectedId, setSelectedId] = createSignal<null | string>(null);
@@ -30,8 +30,9 @@ const SelectionStateContext = createContext<
 });
 
 export const SelectionStateProvider: Component<ParentProps> = (props) => {
-	const presence = usePresenceState();
-	const value = createMemo(() => createSelectionState(presence().player.id));
+	const config = useGameConfig();
+
+	const value = createMemo(() => createSelectionState(config().player.id));
 
 	return (
 		<SelectionStateContext.Provider value={value}>

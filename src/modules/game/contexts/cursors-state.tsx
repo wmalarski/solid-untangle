@@ -11,7 +11,7 @@ import {
 import { createStore, reconcile } from "solid-js/store";
 import type { WebrtcProvider } from "y-webrtc";
 import { REALTIME_THROTTLE_TIME } from "../utils/constants";
-import { usePresenceState } from "./presence-state";
+import { useGameConfig } from "./game-config";
 import { useRealtimeConnection } from "./realtime-connection";
 
 type PlayerCursorState = {
@@ -66,10 +66,11 @@ const CursorsStateContext = createContext<
 
 export const CursorsStateProvider: Component<ParentProps> = (props) => {
 	const realtimeConnection = useRealtimeConnection();
-	const presence = usePresenceState();
+	const config = useGameConfig();
+
 	const value = createMemo(() =>
 		createCursorsState({
-			playerId: presence().player.id,
+			playerId: config().player.id,
 			provider: realtimeConnection().provider,
 		}),
 	);

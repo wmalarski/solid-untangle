@@ -19,13 +19,13 @@ import {
 	TextFieldLabelText,
 	TextFieldRoot,
 } from "~/ui/text-field/text-field";
-import { usePresenceState } from "../contexts/presence-state";
+import { useGameConfig } from "../contexts/game-config";
 import { randomHexColor } from "../utils/colors";
 
 const PlayerForm: Component = () => {
 	const { t } = useI18n();
 
-	const presence = usePresenceState();
+	const config = useGameConfig();
 	const defaultPlayerColor = randomHexColor();
 
 	const submission = useSubmission(setPlayerDetailAction);
@@ -36,7 +36,7 @@ const PlayerForm: Component = () => {
 			class="flex flex-col gap-4"
 			method="post"
 		>
-			<input name="id" type="hidden" value={presence().player.id} />
+			<input name="id" type="hidden" value={config().player.id} />
 			<TextFieldRoot>
 				<TextFieldLabel for="userName">
 					<TextFieldLabelText>{t("invite.username.label")}</TextFieldLabelText>
@@ -85,7 +85,7 @@ const PlayerForm: Component = () => {
 export const PlayerDialog: Component = () => {
 	const { t } = useI18n();
 
-	const presence = usePresenceState();
+	const presence = useGameConfig();
 
 	const isOpen = createMemo(() => {
 		const { player } = presence();

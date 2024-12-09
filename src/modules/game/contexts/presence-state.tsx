@@ -10,21 +10,17 @@ import {
 import { createStore, reconcile } from "solid-js/store";
 import type { WebrtcProvider } from "y-webrtc";
 import type { Player } from "~/modules/player/server/server";
+import { useGameConfig } from "./game-config";
 import { useRealtimeConnection } from "./realtime-connection";
 
 type PresenceState = Record<string, Player | undefined>;
 
 type CreatePresenceStateArgs = {
 	player: Player;
-	gameId: string;
 	provider: WebrtcProvider;
 };
 
-const createPresenceState = ({
-	player,
-	gameId,
-	provider,
-}: CreatePresenceStateArgs) => {
+const createPresenceState = ({ player, provider }: CreatePresenceStateArgs) => {
 	const [players, setPlayers] = createStore<PresenceState>({});
 
 	const onChange = () => {
@@ -45,7 +41,7 @@ const createPresenceState = ({
 
 	provider.awareness.setLocalStateField("user", player);
 
-	return { players, gameId, player };
+	return { players };
 };
 
 const PresenceStateContext = createContext<
@@ -54,19 +50,12 @@ const PresenceStateContext = createContext<
 	throw new Error("PresenceStateContext not defined");
 });
 
-type PresenceStateProviderProps = ParentProps<{
-	player: Player;
-	gameId: string;
-}>;
-
-export const PresenceStateProvider: Component<PresenceStateProviderProps> = (
-	props,
-) => {
+export const PresenceStateProvider: Component<ParentProps> = (props) => {
+	const config = useGameConfig();
 	const realtimeConnection = useRealtimeConnection();
 	const value = createMemo(() =>
 		createPresenceState({
-			player: props.player,
-			gameId: props.gameId,
+			player: config().player,
 			provider: realtimeConnection().provider,
 		}),
 	);

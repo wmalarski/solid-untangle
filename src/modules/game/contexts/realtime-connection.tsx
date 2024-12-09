@@ -8,6 +8,7 @@ import {
 } from "solid-js";
 import { WebrtcProvider } from "y-webrtc";
 import * as Y from "yjs";
+import { useGameConfig } from "./game-config";
 
 const createRealtimeConnection = (gameId: string) => {
 	const ydoc = new Y.Doc();
@@ -28,14 +29,9 @@ const RealtimeConnectionContext = createContext<
 	throw new Error("RealtimeConnectionContext is not defined");
 });
 
-type RealtimeConnectionProviderProps = ParentProps<{
-	gameId: string;
-}>;
-
-export const RealtimeConnectionProvider: Component<
-	RealtimeConnectionProviderProps
-> = (props) => {
-	const value = createMemo(() => createRealtimeConnection(props.gameId));
+export const RealtimeConnectionProvider: Component<ParentProps> = (props) => {
+	const config = useGameConfig();
+	const value = createMemo(() => createRealtimeConnection(config().gameId));
 
 	return (
 		<RealtimeConnectionContext.Provider value={value}>

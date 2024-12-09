@@ -1,6 +1,7 @@
 import { createSignal, Show, Suspense, type Component } from "solid-js";
 import type { Player } from "~/modules/player/server/server";
 import { CursorsStateProvider } from "../contexts/cursors-state";
+import { GameConfigProvider } from "../contexts/game-config";
 import { GameStateProvider } from "../contexts/game-state";
 import { PresenceStateProvider } from "../contexts/presence-state";
 import { RealtimeConnectionProvider } from "../contexts/realtime-connection";
@@ -40,25 +41,27 @@ type GameBoardProps = {
 
 export const GameBoard: Component<GameBoardProps> = (props) => {
 	return (
-		<RealtimeConnectionProvider gameId={props.gameId}>
-			<PresenceStateProvider gameId={props.gameId} player={props.player}>
-				<CursorsStateProvider>
-					<SelectionStateProvider>
-						<GameStateProvider
-							connections={props.connections}
-							initialPositions={props.initialPositions}
-							onGameReload={props.onGameReload}
-						>
-							<ClientBoard />
-							<InfoBar />
-							<TopBar />
-							<ReloadDialog />
-							<PlayerDialog />
-							<SuccessConfetti />
-						</GameStateProvider>
-					</SelectionStateProvider>
-				</CursorsStateProvider>
-			</PresenceStateProvider>
-		</RealtimeConnectionProvider>
+		<GameConfigProvider gameId={props.gameId} player={props.player}>
+			<RealtimeConnectionProvider>
+				<PresenceStateProvider>
+					<CursorsStateProvider>
+						<SelectionStateProvider>
+							<GameStateProvider
+								connections={props.connections}
+								initialPositions={props.initialPositions}
+								onGameReload={props.onGameReload}
+							>
+								<ClientBoard />
+								<InfoBar />
+								<TopBar />
+								<ReloadDialog />
+								<PlayerDialog />
+								<SuccessConfetti />
+							</GameStateProvider>
+						</SelectionStateProvider>
+					</CursorsStateProvider>
+				</PresenceStateProvider>
+			</RealtimeConnectionProvider>
+		</GameConfigProvider>
 	);
 };
