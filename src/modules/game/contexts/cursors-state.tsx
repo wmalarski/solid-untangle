@@ -4,12 +4,15 @@ import {
 	type Component,
 	createContext,
 	createMemo,
+	onCleanup,
 	type ParentProps,
 	useContext,
 } from "solid-js";
-import { createStore, produce } from "solid-js/store";
+import { createStore, reconcile } from "solid-js/store";
+import type { WebrtcProvider } from "y-webrtc";
 import { REALTIME_THROTTLE_TIME } from "../utils/constants";
 import { usePresenceState } from "./presence-state";
+import { useRealtimeConnection } from "./realtime-connection";
 
 type PlayerCursorState = {
 	x: number;
@@ -22,45 +25,37 @@ type PlayerCursorPayload = {
 
 type CursorsState = Record<string, PlayerCursorState | undefined>;
 
-const createCursorsState = (playerId: string) => {
+type CreateCursorsStateArgs = {
+	playerId: string;
+	provider: WebrtcProvider;
+};
+
+const createCursorsState = ({ playerId, provider }: CreateCursorsStateArgs) => {
 	const [cursors, setCursors] = createStore<CursorsState>({});
 
+	const onChange = () => {
+		const newCursors = Object.fromEntries(
+			Array.from(provider.awareness.getStates().values())
+				.filter((value) => value.cursor && value.cursor.playerId !== playerId)
+				.map((value) => [value.cursor.playerId, value.cursor]),
+		);
+		setCursors(reconcile(newCursors));
+	};
+
+	provider.awareness.on("change", onChange);
+	onCleanup(() => {
+		provider.awareness.off("change", onChange);
+	});
+
 	const throttledSend = throttle((payload: PlayerCursorPayload) => {
-		console.log("CURSOR-send", payload);
+		provider.awareness.setLocalStateField("cursor", payload);
 	}, REALTIME_THROTTLE_TIME);
 
 	const send = (state: PlayerCursorState) => {
 		throttledSend({ ...state, playerId });
 	};
 
-	const leave = (playerIds: string[]) => {
-		setCursors(
-			produce((state) => {
-				for (const playerId of playerIds) {
-					state[playerId] = undefined;
-				}
-			}),
-		);
-	};
-
-	const setRemoteCursor = (payload: PlayerCursorPayload) => {
-		setCursors(
-			produce((state) => {
-				const player = state[payload.playerId];
-				if (player) {
-					player.x = payload.x;
-					player.y = payload.y;
-					return;
-				}
-				state[payload.playerId] = {
-					x: payload.x,
-					y: payload.y,
-				};
-			}),
-		);
-	};
-
-	return { cursors, leave, send, setRemoteCursor };
+	return { cursors, send };
 };
 
 const CursorsStateContext = createContext<
@@ -70,8 +65,14 @@ const CursorsStateContext = createContext<
 });
 
 export const CursorsStateProvider: Component<ParentProps> = (props) => {
+	const realtimeConnection = useRealtimeConnection();
 	const presence = usePresenceState();
-	const value = createMemo(() => createCursorsState(presence().player.id));
+	const value = createMemo(() =>
+		createCursorsState({
+			playerId: presence().player.id,
+			provider: realtimeConnection().provider,
+		}),
+	);
 
 	return (
 		<CursorsStateContext.Provider value={value}>

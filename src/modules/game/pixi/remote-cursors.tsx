@@ -16,6 +16,7 @@ import {
 } from "solid-js";
 
 import { useCursorsState } from "../contexts/cursors-state";
+import { usePresenceState } from "../contexts/presence-state";
 import { useTransformState } from "../contexts/transform-state";
 import { getTextColor } from "../utils/colors";
 import { useBoardTheme } from "./board-theme";
@@ -26,9 +27,9 @@ const LABEL_PADDING = 5;
 const LABEL_SHIFT = CURSOR_SIZE * 1.2;
 
 type CursorGraphicsProps = {
-	color: string;
+	color?: string;
 	cursorsContainer: Container;
-	name: string;
+	name?: string;
 	x: number;
 	y: number;
 };
@@ -42,6 +43,10 @@ const CursorGraphics: Component<CursorGraphicsProps> = (props) => {
 	const text = new Text({ style, zIndex: theme().cursorTextZIndex });
 
 	onMount(() => {
+		if (!props.name || !props.color) {
+			return;
+		}
+
 		graphics
 			.moveTo(0, 0)
 			.lineTo(CURSOR_SIZE / 5, CURSOR_SIZE)
@@ -119,6 +124,7 @@ export const RemoteCursors: Component = () => {
 	});
 
 	const cursors = useCursorsState();
+	const presence = usePresenceState();
 	const transform = useTransformState();
 
 	onMount(() => {
@@ -140,7 +146,7 @@ export const RemoteCursors: Component = () => {
 			{(playerId) => (
 				<Show when={cursors().cursors[playerId]}>
 					{(state) => (
-						<Show when={{ color: "#ffffff", name: "aaa" }}>
+						<Show when={presence().players[playerId]}>
 							{(player) => (
 								<CursorGraphics
 									color={player().color}
