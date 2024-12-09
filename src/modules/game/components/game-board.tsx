@@ -3,6 +3,7 @@ import type { Player } from "~/modules/player/server/server";
 import { CursorsStateProvider } from "../contexts/cursors-state";
 import { GameStateProvider } from "../contexts/game-state";
 import { PresenceStateProvider } from "../contexts/presence-state";
+import { RealtimeConnectionProvider } from "../contexts/realtime-connection";
 import { SelectionStateProvider } from "../contexts/selection-state";
 import { PixiStage } from "../pixi/pixi-stage";
 import type { Connection, Point2D } from "../utils/types";
@@ -39,23 +40,25 @@ type GameBoardProps = {
 
 export const GameBoard: Component<GameBoardProps> = (props) => {
 	return (
-		<PresenceStateProvider gameId={props.gameId} player={props.player}>
-			<CursorsStateProvider>
-				<SelectionStateProvider>
-					<GameStateProvider
-						connections={props.connections}
-						initialPositions={props.initialPositions}
-						onGameReload={props.onGameReload}
-					>
-						<ClientBoard />
-						<InfoBar />
-						<TopBar />
-						<ReloadDialog />
-						<PlayerDialog />
-						<SuccessConfetti />
-					</GameStateProvider>
-				</SelectionStateProvider>
-			</CursorsStateProvider>
-		</PresenceStateProvider>
+		<RealtimeConnectionProvider gameId={props.gameId}>
+			<PresenceStateProvider gameId={props.gameId} player={props.player}>
+				<CursorsStateProvider>
+					<SelectionStateProvider>
+						<GameStateProvider
+							connections={props.connections}
+							initialPositions={props.initialPositions}
+							onGameReload={props.onGameReload}
+						>
+							<ClientBoard />
+							<InfoBar />
+							<TopBar />
+							<ReloadDialog />
+							<PlayerDialog />
+							<SuccessConfetti />
+						</GameStateProvider>
+					</SelectionStateProvider>
+				</CursorsStateProvider>
+			</PresenceStateProvider>
+		</RealtimeConnectionProvider>
 	);
 };
