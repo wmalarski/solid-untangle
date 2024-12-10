@@ -1,3 +1,4 @@
+import { createWritableMemo } from "@solid-primitives/memo";
 import {
 	type Accessor,
 	type Component,
@@ -8,6 +9,7 @@ import {
 	useContext,
 } from "solid-js";
 import { createStore, produce } from "solid-js/store";
+import { createGame } from "../utils/creator";
 import { checkForCrossing } from "../utils/geometry";
 import type { Connection, Point2D } from "../utils/types";
 
@@ -82,16 +84,21 @@ const GameStateContext = createContext<
 	throw new Error("GameStateContext is not defined");
 });
 
-type GameStateProviderProps = ParentProps<CreateGameStateContextArgs>;
+export const GameStateProvider: Component<ParentProps> = (props) => {
+	const [game, setGame] = createWritableMemo(() => createGame(10));
 
-export const GameStateProvider: Component<GameStateProviderProps> = (props) => {
-	const value = createMemo(() =>
-		createGameStateContext({
-			connections: props.connections,
-			initialPositions: props.initialPositions,
-			onGameReload: props.onGameReload,
-		}),
-	);
+	const onGameReload = (nodes: number) => {
+		setGame(createGame(nodes));
+	};
+
+	const value = createMemo(() => {
+		const { connections, positions: initialPositions } = game();
+		return createGameStateContext({
+			connections,
+			initialPositions,
+			onGameReload,
+		});
+	});
 
 	return (
 		<GameStateContext.Provider value={value}>

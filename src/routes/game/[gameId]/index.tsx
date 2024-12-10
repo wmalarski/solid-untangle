@@ -1,16 +1,13 @@
-import { createWritableMemo } from "@solid-primitives/memo";
 import { createAsync, useParams, type RouteDefinition } from "@solidjs/router";
-import {
-	createSignal,
-	onMount,
-	Show,
-	Suspense,
-	type Component,
-} from "solid-js";
-import { GameBoard } from "~/modules/game/components/game-board";
-import { createGame } from "~/modules/game/utils/creator";
+import { createSignal, lazy, onMount, Show, Suspense } from "solid-js";
+import { GameLoader } from "~/modules/game/components/game-loader";
 import { getPlayerLoader } from "~/modules/player/server/client";
-import type { Player } from "~/modules/player/server/server";
+
+const GameBoard = lazy(() =>
+	import("~/modules/game/components/game-board").then((module) => ({
+		default: module.GameBoard,
+	})),
+);
 
 export const route = {
 	load: async () => {
@@ -18,31 +15,10 @@ export const route = {
 	},
 } satisfies RouteDefinition;
 
-type GameSectionProps = {
-	player: Player;
-};
-
-const MountedGameSection: Component<GameSectionProps> = (props) => {
+export default function GamePage() {
 	const params = useParams();
+	const player = createAsync(() => getPlayerLoader());
 
-	const [game, setGame] = createWritableMemo(() => createGame(10));
-
-	const onGameReload = (nodes: number) => {
-		setGame(createGame(nodes));
-	};
-
-	return (
-		<GameBoard
-			gameId={params.gameId}
-			connections={game().connections}
-			initialPositions={game().positions}
-			player={props.player}
-			onGameReload={onGameReload}
-		/>
-	);
-};
-
-const GameSection: Component<GameSectionProps> = (props) => {
 	const [isMounted, setIsMounted] = createSignal(false);
 
 	onMount(() => {
@@ -50,20 +26,10 @@ const GameSection: Component<GameSectionProps> = (props) => {
 	});
 
 	return (
-		<Show when={isMounted()}>
-			<MountedGameSection player={props.player} />
-		</Show>
-	);
-};
-
-export default function GamePage() {
-	const player = createAsync(() => getPlayerLoader());
-
-	return (
 		<main>
-			<Suspense>
-				<Show when={player()}>
-					{(player) => <GameSection player={player()} />}
+			<Suspense fallback={<GameLoader />}>
+				<Show when={isMounted()} fallback={<GameLoader />}>
+					<GameBoard gameId={params.gameId} player={player()} />
 				</Show>
 			</Suspense>
 		</main>

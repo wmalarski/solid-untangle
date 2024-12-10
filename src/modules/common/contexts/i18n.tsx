@@ -44,6 +44,7 @@ const enDict = {
 		close: "Close dialog",
 	},
 	board: {
+		loading: "Loading",
 		zoom: {
 			reset: "Reset zoom",
 			zoomIn: "Zoom in",
