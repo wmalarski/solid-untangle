@@ -1,9 +1,9 @@
 import { createWritableMemo } from "@solid-primitives/memo";
+import { nanoid } from "nanoid";
 import {
 	type Accessor,
 	type Component,
 	createContext,
-	createEffect,
 	createMemo,
 	createSignal,
 	onCleanup,
@@ -18,7 +18,9 @@ import { checkForCrossing } from "../utils/geometry";
 import type { Connection, Point2D } from "../utils/types";
 import { useRealtimeConnection } from "./realtime-connection";
 
+const CONNECTION_MAP = "connections-map";
 const CONNECTION_CONFIG_KEY = "connections";
+const CONNECTION_SYNC_KEY = "connections-sync";
 
 const getConnectionPairs = (connections: Connection[]) => {
 	return connections.flatMap((connection, index) => {
@@ -42,6 +44,21 @@ const detectCrossing = (
 	});
 };
 
+const createIsInitializedDetection = (
+	provider: WebrtcProvider,
+	callback: (isInitialized: boolean) => void,
+) => {
+	const onAwarenessChange = (event: { added: number[] }) => {
+		if (event.added.length > 0) {
+			callback(true);
+			clearTimeout(timeout);
+		}
+	};
+	provider.awareness.once("change", onAwarenessChange);
+	const timeout = setTimeout(() => callback(false), 1000);
+	onCleanup(() => clearTimeout(timeout));
+};
+
 type CreateGameStateContextArgs = {
 	connections: Connection[];
 	initialPositions: Record<string, Point2D>;
@@ -52,23 +69,12 @@ type CreateGameStateContextArgs = {
 const createGameStateContext = ({
 	connections,
 	initialPositions,
-	onGameReload,
 	provider,
 }: CreateGameStateContextArgs) => {
-	// const connectionArray = provider.doc.getArray(CONNECTION_CONFIG_KEY);
-
-	// console.log("connectionArray1", connectionArray.toArray());
-
-	// if (connectionArray.length === 0) {
-	// 	const { connections } = createGame(10);
-	// 	connectionArray.delete(0, connectionArray.length);
-	// 	connectionArray.push(connections);
-	// }
-
-	// console.log("connectionArray2", connectionArray.toArray());
-
 	const [positions, setPositions] = createStore(initialPositions);
+
 	const connectionPairs = getConnectionPairs(connections);
+
 	const [hasEnded, setHasEnded] = createSignal(false);
 
 	const setPosition = (nodeId: string, position: Point2D) => {
@@ -84,14 +90,95 @@ const createGameStateContext = ({
 		setHasEnded(!hasCrossing);
 	};
 
+	const connectionsMap = provider.doc.getMap(CONNECTION_MAP);
+
 	const startNewGame = (nodes: number) => {
 		setHasEnded(false);
-		onGameReload(nodes);
-
-		const map = provider.doc.getMap();
-		const { connections } = createGame(10);
-		map.set(CONNECTION_CONFIG_KEY, connections);
+		const { connections } = createGame(nodes);
+		connectionsMap.set(CONNECTION_CONFIG_KEY, connections);
 	};
+
+	const listener = (event: YMapEvent<unknown>, transaction: Transaction) => {
+		const connections = connectionsMap.get(CONNECTION_CONFIG_KEY);
+
+		// if (transaction.local) {
+		// 	return;
+		// }
+
+		// const array = provider.doc.getArray(CONNECTION_CONFIG_KEY);
+		// array.delete(0, array.length);
+		// const { connections } = createGame(10);
+		// array.push(connections);
+		// console.log("array.doc.isSynced", provider.doc.isSynced);
+		console.log("array-listener", event, connections, transaction);
+	};
+
+	connectionsMap.observe(listener);
+	onCleanup(() => connectionsMap.unobserve(listener));
+
+	// const connectionListener = () => {
+	// 	const initialConnections = connectionsMap.get(CONNECTION_CONFIG_KEY);
+	// 	console.log(
+	// 		"connectionListener",
+	// 		initialConnections,
+	// 		connectionsMap.(""),
+	// 	);
+
+	// 	if (!initialConnections) {
+	// 		startNewGame(10);
+	// 	}
+	// };
+
+	// connectionsMap.observe()
+
+	// createAsync(async () => {
+	// 	console.log("before whenSynced");
+	// 	await provider.doc.whenSynced;
+	// 	console.log("after whenSynced");
+	// 	return true;
+	// });
+
+	// provider.on("status", connectionListener);
+	// onCleanup(() => provider.off("status", connectionListener));
+
+	// console.log("provider.doc.isSynced", provider.doc.isSynced);
+
+	// const initialConnections = connectionsMap.has(CONNECTION_CONFIG_KEY);
+	// console.log(CONNECTION_CONFIG_KEY, initialConnections);
+
+	// if (!initialConnections) {
+	// 	startNewGame(10);
+	// }
+
+	// connectionsMap.set(CONNECTION_CONFIG_KEY, []);
+	// provider.doc.transact((transaction) => {
+	// 	transaction.
+	// 	transaction.meta.set()
+	// })
+
+	createIsInitializedDetection(provider, (isInitialized) => {
+		// const connections = connectionsMap.get(CONNECTION_CONFIG_KEY);
+
+		if (isInitialized) {
+			connectionsMap.set(CONNECTION_SYNC_KEY, nanoid());
+		} else {
+			startNewGame(10);
+		}
+
+		// if (transaction.local) {
+		// 	return;
+		// }
+
+		// const array = provider.doc.getArray(CONNECTION_CONFIG_KEY);
+		// array.delete(0, array.length);
+		// const { connections } = createGame(10);
+		// array.push(connections);
+		// console.log("array.doc.isSynced", provider.doc.isSynced);
+		console.log("createIsInitializedDetection", isInitialized);
+	});
+
+	// onCleanup(() => provider.awareness.off("change", onAwarenessChange));
+	// console.log("provider.awareness", provider.awareness.states);
 
 	return {
 		connections,
@@ -126,58 +213,6 @@ export const GameStateProvider: Component<ParentProps> = (props) => {
 			connections,
 			initialPositions,
 			onGameReload,
-		});
-	});
-
-	// createEffect(() => {
-	// 	const provider = realtimeConnection();
-
-	// 	const listener = ({ connected }: { connected: boolean }) => {
-	// 		console.log("status-listener", connected);
-
-	// 		if (!connected) {
-	// 			return;
-	// 		}
-
-	// 		const array = provider.doc.getArray(CONNECTION_CONFIG_KEY);
-	// 		console.log("ARRAY", array.toArray());
-
-	// 		if (array.length !== 0) {
-	// 			return;
-	// 		}
-
-	// 		const { connections } = createGame(10);
-	// 		array.delete(0, array.length);
-	// 		array.push(connections);
-	// 	};
-
-	// 	provider.on("status", listener);
-
-	// 	onCleanup(() => {
-	// 		provider.off("status", listener);
-	// 	});
-	// });
-
-	createEffect(() => {
-		const provider = realtimeConnection();
-
-		const map = provider.doc.getMap();
-
-		const listener = (event: YMapEvent<unknown>, transaction: Transaction) => {
-			const connections = map.get(CONNECTION_CONFIG_KEY);
-
-			// const array = provider.doc.getArray(CONNECTION_CONFIG_KEY);
-			// array.delete(0, array.length);
-			// const { connections } = createGame(10);
-			// array.push(connections);
-
-			console.log("array-listener", event, connections, transaction);
-		};
-
-		map.observe(listener);
-
-		onCleanup(() => {
-			map.unobserve(listener);
 		});
 	});
 

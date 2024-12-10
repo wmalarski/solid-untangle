@@ -3,7 +3,6 @@ import {
 	type Component,
 	createContext,
 	createMemo,
-	onCleanup,
 	type ParentProps,
 	useContext,
 } from "solid-js";
@@ -12,17 +11,25 @@ import * as Y from "yjs";
 import { useGameConfig } from "./game-config";
 
 const createRealtimeConnection = (gameId: string) => {
-	const ydoc = new Y.Doc({ autoLoad: true });
+	const ydoc = new Y.Doc({ autoLoad: true, shouldLoad: true });
+
+	// ydoc.transact()
+
 	const signaling = import.meta.env.VITE_WEBRTC_SIGNALING_URLS.split(",");
 	const provider = new WebrtcProvider(gameId, ydoc, { signaling });
 
-	provider.connect();
-	console.log("CONNECT");
+	// provider.
 
-	onCleanup(() => {
-		provider.disconnect();
-		console.log("DISCONNECT");
-	});
+	// persistence.
+
+	// provider.connect();
+	// ydoc.load();
+	// console.log("CONNECT");
+
+	// onCleanup(() => {
+	// 	provider.disconnect();
+	// 	console.log("DISCONNECT");
+	// });
 
 	return provider;
 };
