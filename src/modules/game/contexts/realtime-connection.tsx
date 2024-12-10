@@ -12,14 +12,10 @@ import { useGameConfig } from "./game-config";
 
 const createRealtimeConnection = (gameId: string) => {
 	const ydoc = new Y.Doc();
-	const provider = new WebrtcProvider(gameId, ydoc, {
-		signaling: [
-			"ws://localhost:4444",
-			// "wss://signaling.yjs.dev",
-			// "wss://y-webrtc-signaling-eu.herokuapp.com",
-			// "wss://y-webrtc-signaling-us.herokuapp.com",
-		],
-	});
+
+	const signaling = import.meta.env.VITE_WEBRTC_SIGNALING_URLS.split(",");
+	const provider = new WebrtcProvider(gameId, ydoc, { signaling });
+
 	return { ydoc, provider };
 };
 
