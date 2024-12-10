@@ -71,7 +71,7 @@ export const CursorsStateProvider: Component<ParentProps> = (props) => {
 	const value = createMemo(() =>
 		createCursorsState({
 			playerId: config().player.id,
-			provider: realtimeConnection().provider,
+			provider: realtimeConnection(),
 		}),
 	);
 

@@ -53,10 +53,11 @@ const PresenceStateContext = createContext<
 export const PresenceStateProvider: Component<ParentProps> = (props) => {
 	const config = useGameConfig();
 	const realtimeConnection = useRealtimeConnection();
+
 	const value = createMemo(() =>
 		createPresenceState({
 			player: config().player,
-			provider: realtimeConnection().provider,
+			provider: realtimeConnection(),
 		}),
 	);
 
