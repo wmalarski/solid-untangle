@@ -64,6 +64,6 @@ export const Confetti: Component<ConfettiProps> = (props) => {
 };
 
 export const SuccessConfetti: Component = () => {
-	const data = useGameState();
-	return <Confetti enabled={data().hasEnded()} />;
+	const game = useGameState();
+	return <Confetti enabled={game().hasEnded()} />;
 };

@@ -6,6 +6,7 @@ import { RIGHT_BUTTON } from "../utils/constants";
 import { GraphEdge } from "./graph-edge";
 import { GraphNode } from "./graph-node";
 import { usePixiContainer } from "./pixi-app";
+import { RemoteCursors } from "./remote-cursors";
 import { usePreventMenu } from "./use-prevent-menu";
 import { useStageTransform } from "./use-stage-transform";
 
@@ -33,25 +34,28 @@ export const GraphBoard: Component = () => {
 	usePreventMenu();
 	useStageDeselect();
 
-	const store = useGameState();
+	const game = useGameState();
 
 	return (
 		<>
-			<For each={store().connections}>
+			<For each={game().store.connections}>
 				{(connection) => (
 					<GraphEdge
 						connection={connection}
-						startPosition={store().positions[connection.start]}
-						endPosition={store().positions[connection.end]}
+						startPosition={game().store.positions[connection.start]}
+						endPosition={game().store.positions[connection.end]}
 					/>
 				)}
 			</For>
-			<For each={Object.keys(store().positions)}>
+			<For each={Object.keys(game().store.positions)}>
 				{(nodeId) => (
-					<GraphNode nodeId={nodeId} position={store().positions[nodeId]} />
+					<GraphNode
+						nodeId={nodeId}
+						position={game().store.positions[nodeId]}
+					/>
 				)}
 			</For>
-			{/* <RemoteCursors /> */}
+			<RemoteCursors />
 		</>
 	);
 };

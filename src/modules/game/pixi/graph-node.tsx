@@ -13,7 +13,7 @@ type GraphNodeProps = {
 };
 
 export const GraphNode: Component<GraphNodeProps> = (props) => {
-	const store = useGameState();
+	const game = useGameState();
 	const selection = useSelectionState();
 
 	const container = usePixiContainer();
@@ -50,13 +50,13 @@ export const GraphNode: Component<GraphNodeProps> = (props) => {
 		displayObject: graphics,
 		onDragEnd: () => {
 			selection().select(null);
-			store().confirmPosition(props.nodeId, {
+			game().confirmPosition(props.nodeId, {
 				x: graphics.x,
 				y: graphics.y,
 			});
 		},
 		onDragMove: () => {
-			store().setPosition(props.nodeId, {
+			game().setPosition(props.nodeId, {
 				x: graphics.x,
 				y: graphics.y,
 			});

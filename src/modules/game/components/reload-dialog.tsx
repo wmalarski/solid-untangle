@@ -26,7 +26,7 @@ import { useSelectionState } from "../contexts/selection-state";
 const ReloadForm: Component = () => {
 	const { t } = useI18n();
 
-	const state = useGameState();
+	const game = useGameState();
 	const selection = useSelectionState();
 
 	const onSubmit: ComponentProps<"form">["onSubmit"] = async (event) => {
@@ -38,7 +38,7 @@ const ReloadForm: Component = () => {
 			decode(formData, { numbers: ["nodes"] }),
 		);
 
-		const { startNewGame } = state();
+		const { startNewGame } = game();
 		startNewGame(data.nodes);
 		selection().clear();
 	};
@@ -72,9 +72,9 @@ const ReloadForm: Component = () => {
 export const ReloadDialog: Component = () => {
 	const { t } = useI18n();
 
-	const store = useGameState();
+	const game = useGameState();
 
-	const isOpen = createMemo(() => store().hasEnded());
+	const isOpen = createMemo(() => game().hasEnded());
 
 	const onOpenChange = () => {
 		//

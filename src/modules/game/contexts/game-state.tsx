@@ -1,10 +1,9 @@
-import { createWritableMemo } from "@solid-primitives/memo";
-import { nanoid } from "nanoid";
 import {
 	type Accessor,
 	type Component,
 	type ParentProps,
 	createContext,
+	createEffect,
 	createMemo,
 	createSignal,
 	onCleanup,
@@ -12,15 +11,16 @@ import {
 } from "solid-js";
 import { createStore, produce } from "solid-js/store";
 import type { WebrtcProvider } from "y-webrtc";
-import type { Transaction, YMapEvent } from "yjs";
+import type {} from "yjs";
 import { createGame } from "../utils/creator";
 import { checkForCrossing } from "../utils/geometry";
 import type { Connection, Point2D } from "../utils/types";
 import { useRealtimeConnection } from "./realtime-connection";
 
+const SYNC_KEY = "sync";
 const CONNECTION_MAP = "connections-map";
 const CONNECTION_CONFIG_KEY = "connections";
-const CONNECTION_SYNC_KEY = "connections-sync";
+const POSITIONS_MAP = "positions-map";
 const DEFAULT_GAME_SIZE = 10;
 
 const getConnectionPairs = (connections: Connection[]) => {
@@ -60,77 +60,88 @@ const onDetectIsBoardInitialized = (
 	onCleanup(() => clearTimeout(timeout));
 };
 
-type CreateGameStateContextArgs = {
+type GameStateStore = {
+	positions: Record<string, Point2D>;
 	connections: Connection[];
-	initialPositions: Record<string, Point2D>;
-	onGameReload: (nodes: number) => void;
+};
+
+type CreateGameStateContextArgs = {
 	provider: WebrtcProvider;
 };
 
-const createGameStateContext = ({
-	connections,
-	initialPositions,
-	provider,
-}: CreateGameStateContextArgs) => {
-	const [positions, setPositions] = createStore(initialPositions);
-
-	const connectionPairs = getConnectionPairs(connections);
-
+const createGameStateContext = ({ provider }: CreateGameStateContextArgs) => {
 	const [hasEnded, setHasEnded] = createSignal(false);
 
+	const [store, setStore] = createStore<GameStateStore>({
+		connections: [],
+		positions: {},
+	});
+
+	const connectionPairs = createMemo(() =>
+		getConnectionPairs(store.connections),
+	);
+
+	createEffect(() => {
+		console.log("STORE");
+		console.log(JSON.stringify(store, null, 2));
+	});
+
 	const setPosition = (nodeId: string, position: Point2D) => {
-		setPositions(
+		setStore(
 			produce((state) => {
-				state[nodeId] = position;
+				state.positions[nodeId] = position;
 			}),
 		);
 	};
 
 	const confirmPosition = (_nodeId: string, _position: Point2D) => {
-		const hasCrossing = detectCrossing(connectionPairs, positions);
+		const hasCrossing = detectCrossing(connectionPairs(), store.positions);
 		setHasEnded(!hasCrossing);
 	};
 
-	const connectionsMap = provider.doc.getMap(CONNECTION_MAP);
+	// const connectionsMap = provider.doc.getMap(CONNECTION_MAP);
+	// const positionsMap = provider.doc.getMap(POSITIONS_MAP);
 
 	const startNewGame = (nodes: number) => {
 		setHasEnded(false);
-		const { connections } = createGame(nodes);
-		connectionsMap.set(CONNECTION_CONFIG_KEY, connections);
+		setStore(createGame(nodes));
+
+		// provider.doc.transact(() => {
+		// 	const { connections, positions } = createGame(nodes);
+		// 	connectionsMap.set(CONNECTION_CONFIG_KEY, connections);
+
+		// 	for (const [nodeId, position] of Object.entries(positions)) {
+		// 		positionsMap.set(nodeId, position);
+		// 	}
+		// });
 	};
 
-	const listener = (event: YMapEvent<unknown>, transaction: Transaction) => {
-		const connections = connectionsMap.get(CONNECTION_CONFIG_KEY);
+	// const connectionsListener = () => {
+	// 	const connections = connectionsMap.get(CONNECTION_CONFIG_KEY);
+	// 	if (connections) {
+	// 		setConnections(connections as Connection[]);
+	// 	}
+	// };
+	// connectionsMap.observe(connectionsListener);
+	// onCleanup(() => connectionsMap.unobserve(connectionsListener));
 
-		// if (transaction.local) {
-		// 	return;
-		// }
+	// const positionsListener = () => {
+	// 	setPositions(reconcile(positionsMap.toJSON()));
+	// };
+	// positionsMap.observe(positionsListener);
+	// onCleanup(() => positionsMap.unobserve(positionsListener));
 
-		// const array = provider.doc.getArray(CONNECTION_CONFIG_KEY);
-		// array.delete(0, array.length);
-		// const { connections } = createGame(10);
-		// array.push(connections);
-		// console.log("array.doc.isSynced", provider.doc.isSynced);
-		console.log("array-listener", event, connections, transaction);
-	};
-
-	connectionsMap.observe(listener);
-	onCleanup(() => connectionsMap.unobserve(listener));
-
-	onDetectIsBoardInitialized(provider, (isInitialized) => {
-		if (isInitialized) {
-			connectionsMap.set(CONNECTION_SYNC_KEY, nanoid());
-		} else {
-			startNewGame(DEFAULT_GAME_SIZE);
-		}
-	});
-
-	// onCleanup(() => provider.awareness.off("change", onAwarenessChange));
-	// console.log("provider.awareness", provider.awareness.states);
+	// onDetectIsBoardInitialized(provider, (isInitialized) => {
+	// 	if (isInitialized) {
+	// 		connectionsMap.set(SYNC_KEY, nanoid());
+	// 		positionsMap.set(SYNC_KEY, nanoid());
+	// 	} else {
+	// 		startNewGame(DEFAULT_GAME_SIZE);
+	// 	}
+	// });
 
 	return {
-		connections,
-		positions,
+		store,
 		setPosition,
 		confirmPosition,
 		hasEnded,
@@ -147,22 +158,9 @@ const GameStateContext = createContext<
 export const GameStateProvider: Component<ParentProps> = (props) => {
 	const realtimeConnection = useRealtimeConnection();
 
-	const [game, setGame] = createWritableMemo(() => createGame(10));
-
-	const onGameReload = (nodes: number) => {
-		setGame(createGame(nodes));
-	};
-
-	const value = createMemo(() => {
-		const { connections, positions: initialPositions } = game();
-
-		return createGameStateContext({
-			provider: realtimeConnection(),
-			connections,
-			initialPositions,
-			onGameReload,
-		});
-	});
+	const value = createMemo(() =>
+		createGameStateContext({ provider: realtimeConnection() }),
+	);
 
 	return (
 		<GameStateContext.Provider value={value}>
