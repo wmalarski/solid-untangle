@@ -1,15 +1,15 @@
+import { nanoid } from "nanoid";
 import {
 	type Accessor,
 	type Component,
 	type ParentProps,
 	createContext,
-	createEffect,
 	createMemo,
 	createSignal,
 	onCleanup,
 	useContext,
 } from "solid-js";
-import { createStore, produce } from "solid-js/store";
+import { createStore, produce, reconcile } from "solid-js/store";
 import type { WebrtcProvider } from "y-webrtc";
 import type {} from "yjs";
 import { createGame } from "../utils/creator";
@@ -18,9 +18,8 @@ import type { Connection, Point2D } from "../utils/types";
 import { useRealtimeConnection } from "./realtime-connection";
 
 const SYNC_KEY = "sync";
-const CONNECTION_MAP = "connections-map";
-const CONNECTION_CONFIG_KEY = "connections";
-const POSITIONS_MAP = "positions-map";
+const CONNECTION_KEY = "connections";
+const POSITIONS_KEY = "positions";
 const DEFAULT_GAME_SIZE = 10;
 
 const getConnectionPairs = (connections: Connection[]) => {
@@ -81,11 +80,6 @@ const createGameStateContext = ({ provider }: CreateGameStateContextArgs) => {
 		getConnectionPairs(store.connections),
 	);
 
-	createEffect(() => {
-		console.log("STORE");
-		console.log(JSON.stringify(store, null, 2));
-	});
-
 	const setPosition = (nodeId: string, position: Point2D) => {
 		setStore(
 			produce((state) => {
@@ -94,51 +88,57 @@ const createGameStateContext = ({ provider }: CreateGameStateContextArgs) => {
 		);
 	};
 
-	const confirmPosition = (_nodeId: string, _position: Point2D) => {
-		const hasCrossing = detectCrossing(connectionPairs(), store.positions);
-		setHasEnded(!hasCrossing);
+	const connectionsArray = provider.doc.getArray<Connection>(CONNECTION_KEY);
+	const positionsMap = provider.doc.getMap<Point2D>(POSITIONS_KEY);
+
+	const checkForEnding = () => {
+		const pairs = connectionPairs();
+		if (pairs.length > 0) {
+			const hasCrossing = detectCrossing(pairs, store.positions);
+			setHasEnded(!hasCrossing);
+		}
 	};
 
-	// const connectionsMap = provider.doc.getMap(CONNECTION_MAP);
-	// const positionsMap = provider.doc.getMap(POSITIONS_MAP);
+	const confirmPosition = (nodeId: string, position: Point2D) => {
+		positionsMap.set(nodeId, position);
+		checkForEnding();
+	};
 
 	const startNewGame = (nodes: number) => {
 		setHasEnded(false);
-		setStore(createGame(nodes));
 
-		// provider.doc.transact(() => {
-		// 	const { connections, positions } = createGame(nodes);
-		// 	connectionsMap.set(CONNECTION_CONFIG_KEY, connections);
+		provider.doc.transact(() => {
+			const { connections, positions } = createGame(nodes);
 
-		// 	for (const [nodeId, position] of Object.entries(positions)) {
-		// 		positionsMap.set(nodeId, position);
-		// 	}
-		// });
+			connectionsArray.delete(0, connectionsArray.length);
+			connectionsArray.push(connections);
+
+			positionsMap.clear();
+			for (const [nodeId, position] of Object.entries(positions)) {
+				positionsMap.set(nodeId, position);
+			}
+		});
 	};
 
-	// const connectionsListener = () => {
-	// 	const connections = connectionsMap.get(CONNECTION_CONFIG_KEY);
-	// 	if (connections) {
-	// 		setConnections(connections as Connection[]);
-	// 	}
-	// };
-	// connectionsMap.observe(connectionsListener);
-	// onCleanup(() => connectionsMap.unobserve(connectionsListener));
+	const onDocUpdate = () => {
+		setStore(
+			reconcile({
+				connections: connectionsArray.toArray(),
+				positions: positionsMap.toJSON(),
+			}),
+		);
+		checkForEnding();
+	};
+	provider.doc.on("updateV2", onDocUpdate);
+	onCleanup(() => provider.doc.off("updateV2", onDocUpdate));
 
-	// const positionsListener = () => {
-	// 	setPositions(reconcile(positionsMap.toJSON()));
-	// };
-	// positionsMap.observe(positionsListener);
-	// onCleanup(() => positionsMap.unobserve(positionsListener));
-
-	// onDetectIsBoardInitialized(provider, (isInitialized) => {
-	// 	if (isInitialized) {
-	// 		connectionsMap.set(SYNC_KEY, nanoid());
-	// 		positionsMap.set(SYNC_KEY, nanoid());
-	// 	} else {
-	// 		startNewGame(DEFAULT_GAME_SIZE);
-	// 	}
-	// });
+	onDetectIsBoardInitialized(provider, (isInitialized) => {
+		if (isInitialized) {
+			provider.doc.getText(SYNC_KEY).setAttribute(SYNC_KEY, nanoid());
+			return;
+		}
+		startNewGame(DEFAULT_GAME_SIZE);
+	});
 
 	return {
 		store,
