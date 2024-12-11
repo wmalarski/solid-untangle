@@ -10,18 +10,6 @@ import {
 } from "solid-js";
 
 const enDict = {
-	createBoard: {
-		button: "Submit",
-		title: "Create board",
-	},
-	updatePlayer: {
-		button: "Start",
-		name: {
-			label: "Name",
-			placeholder: "Enter your name",
-		},
-		title: "Join",
-	},
 	error: {
 		description: "Something went wrong: {{message}}",
 		home: "Home",
@@ -40,9 +28,6 @@ const enDict = {
 			"Solid Untangle app is a non-trivial local first demo application built using Solid Start.",
 		title: "Solid Untangle",
 	},
-	dialog: {
-		close: "Close dialog",
-	},
 	board: {
 		loading: "Loading",
 		zoom: {
@@ -58,6 +43,7 @@ const enDict = {
 			description: "Do you want to play again?",
 			error: "Error",
 			startAgain: "Start Again",
+			nodes: "Nodes",
 			title: "Congratulations!",
 		},
 		topBar: {

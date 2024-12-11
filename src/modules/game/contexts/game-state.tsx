@@ -21,6 +21,7 @@ import { useRealtimeConnection } from "./realtime-connection";
 const CONNECTION_MAP = "connections-map";
 const CONNECTION_CONFIG_KEY = "connections";
 const CONNECTION_SYNC_KEY = "connections-sync";
+const DEFAULT_GAME_SIZE = 10;
 
 const getConnectionPairs = (connections: Connection[]) => {
 	return connections.flatMap((connection, index) => {
@@ -44,7 +45,7 @@ const detectCrossing = (
 	});
 };
 
-const createIsInitializedDetection = (
+const onDetectIsBoardInitialized = (
 	provider: WebrtcProvider,
 	callback: (isInitialized: boolean) => void,
 ) => {
@@ -116,65 +117,12 @@ const createGameStateContext = ({
 	connectionsMap.observe(listener);
 	onCleanup(() => connectionsMap.unobserve(listener));
 
-	// const connectionListener = () => {
-	// 	const initialConnections = connectionsMap.get(CONNECTION_CONFIG_KEY);
-	// 	console.log(
-	// 		"connectionListener",
-	// 		initialConnections,
-	// 		connectionsMap.(""),
-	// 	);
-
-	// 	if (!initialConnections) {
-	// 		startNewGame(10);
-	// 	}
-	// };
-
-	// connectionsMap.observe()
-
-	// createAsync(async () => {
-	// 	console.log("before whenSynced");
-	// 	await provider.doc.whenSynced;
-	// 	console.log("after whenSynced");
-	// 	return true;
-	// });
-
-	// provider.on("status", connectionListener);
-	// onCleanup(() => provider.off("status", connectionListener));
-
-	// console.log("provider.doc.isSynced", provider.doc.isSynced);
-
-	// const initialConnections = connectionsMap.has(CONNECTION_CONFIG_KEY);
-	// console.log(CONNECTION_CONFIG_KEY, initialConnections);
-
-	// if (!initialConnections) {
-	// 	startNewGame(10);
-	// }
-
-	// connectionsMap.set(CONNECTION_CONFIG_KEY, []);
-	// provider.doc.transact((transaction) => {
-	// 	transaction.
-	// 	transaction.meta.set()
-	// })
-
-	createIsInitializedDetection(provider, (isInitialized) => {
-		// const connections = connectionsMap.get(CONNECTION_CONFIG_KEY);
-
+	onDetectIsBoardInitialized(provider, (isInitialized) => {
 		if (isInitialized) {
 			connectionsMap.set(CONNECTION_SYNC_KEY, nanoid());
 		} else {
-			startNewGame(10);
+			startNewGame(DEFAULT_GAME_SIZE);
 		}
-
-		// if (transaction.local) {
-		// 	return;
-		// }
-
-		// const array = provider.doc.getArray(CONNECTION_CONFIG_KEY);
-		// array.delete(0, array.length);
-		// const { connections } = createGame(10);
-		// array.push(connections);
-		// console.log("array.doc.isSynced", provider.doc.isSynced);
-		console.log("createIsInitializedDetection", isInitialized);
 	});
 
 	// onCleanup(() => provider.awareness.off("change", onAwarenessChange));
