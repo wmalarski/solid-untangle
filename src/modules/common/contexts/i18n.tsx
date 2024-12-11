@@ -49,14 +49,14 @@ const enDict = {
 		topBar: {
 			players: "Players",
 		},
-	},
-	invite: {
-		button: "Accept",
-		color: "Color",
-		title: "Join",
-		username: {
-			label: "Name",
-			placeholder: "Your name",
+		invite: {
+			button: "Accept",
+			color: "Color",
+			title: "Join",
+			username: {
+				label: "Name",
+				placeholder: "Your name",
+			},
 		},
 	},
 };

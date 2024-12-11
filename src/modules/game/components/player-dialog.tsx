@@ -39,13 +39,15 @@ const PlayerForm: Component = () => {
 			<input name="id" type="hidden" value={config().player.id} />
 			<TextFieldRoot>
 				<TextFieldLabel for="userName">
-					<TextFieldLabelText>{t("invite.username.label")}</TextFieldLabelText>
+					<TextFieldLabelText>
+						{t("board.invite.username.label")}
+					</TextFieldLabelText>
 				</TextFieldLabel>
 				<TextFieldInput
 					disabled={submission.pending}
 					id="name"
 					name="name"
-					placeholder={t("invite.username.placeholder")}
+					placeholder={t("board.invite.username.placeholder")}
 					variant="bordered"
 				/>
 				<Show when={submission.result?.errors?.userName}>
@@ -56,13 +58,13 @@ const PlayerForm: Component = () => {
 			</TextFieldRoot>
 			<TextFieldRoot>
 				<TextFieldLabel for="color">
-					<TextFieldLabelText>{t("invite.color")}</TextFieldLabelText>
+					<TextFieldLabelText>{t("board.invite.color")}</TextFieldLabelText>
 				</TextFieldLabel>
 				<TextFieldInput
 					disabled={submission.pending}
 					id="color"
 					name="color"
-					placeholder={t("invite.color")}
+					placeholder={t("board.invite.color")}
 					type="color"
 					value={defaultPlayerColor}
 					variant="bordered"
@@ -76,7 +78,7 @@ const PlayerForm: Component = () => {
 				isLoading={submission.pending}
 				type="submit"
 			>
-				{t("invite.button")}
+				{t("board.invite.button")}
 			</Button>
 		</form>
 	);
@@ -103,7 +105,7 @@ export const PlayerDialog: Component = () => {
 				<DialogPositioner>
 					<DialogContent>
 						<DialogHeader>
-							<DialogTitle>{t("invite.title")}</DialogTitle>
+							<DialogTitle>{t("board.invite.title")}</DialogTitle>
 						</DialogHeader>
 						<PlayerForm />
 					</DialogContent>
