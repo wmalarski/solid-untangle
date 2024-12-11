@@ -28,6 +28,11 @@ const enDict = {
 			"Solid Untangle app is a non-trivial local first demo application built using Solid Start.",
 		title: "Solid Untangle",
 	},
+	homepage: {
+		enterGame: "Enter Game",
+		gameName: "Game Name",
+		load: "Load",
+	},
 	board: {
 		loading: "Loading",
 		zoom: {
