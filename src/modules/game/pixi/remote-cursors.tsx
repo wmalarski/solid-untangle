@@ -7,12 +7,12 @@ import {
 } from "pixi.js";
 import {
 	type Component,
+	For,
+	Show,
 	createEffect,
 	createMemo,
-	For,
 	onCleanup,
 	onMount,
-	Show,
 } from "solid-js";
 
 import { useCursorsState } from "../contexts/cursors-state";

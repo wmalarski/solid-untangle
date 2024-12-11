@@ -2,10 +2,10 @@ import { throttle } from "@solid-primitives/scheduled";
 import {
 	type Accessor,
 	type Component,
+	type ParentProps,
 	createContext,
 	createMemo,
 	onCleanup,
-	type ParentProps,
 	useContext,
 } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";

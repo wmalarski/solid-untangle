@@ -1,5 +1,5 @@
 import { useSubmission } from "@solidjs/router";
-import { type Component, createMemo, Show } from "solid-js";
+import { type Component, Show, createMemo } from "solid-js";
 import { useI18n } from "~/modules/common/contexts/i18n";
 import { setPlayerDetailAction } from "~/modules/player/server/client";
 import { Button } from "~/ui/button/button";

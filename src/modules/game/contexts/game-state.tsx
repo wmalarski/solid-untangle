@@ -3,11 +3,11 @@ import { nanoid } from "nanoid";
 import {
 	type Accessor,
 	type Component,
+	type ParentProps,
 	createContext,
 	createMemo,
 	createSignal,
 	onCleanup,
-	type ParentProps,
 	useContext,
 } from "solid-js";
 import { createStore, produce } from "solid-js/store";

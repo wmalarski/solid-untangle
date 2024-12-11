@@ -1,4 +1,4 @@
-import { type Component, createMemo, For, Show } from "solid-js";
+import { type Component, For, Show, createMemo } from "solid-js";
 import { useI18n } from "~/modules/common/contexts/i18n";
 import type { Player } from "~/modules/player/server/server";
 import { Avatar, AvatarContent, AvatarGroup } from "~/ui/avatar/avatar";

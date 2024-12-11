@@ -1,5 +1,5 @@
 import { Graphics } from "pixi.js";
-import { createEffect, createMemo, onCleanup, type Component } from "solid-js";
+import { type Component, createEffect, createMemo, onCleanup } from "solid-js";
 import { useSelectionState } from "../contexts/selection-state";
 import type { Connection, Point2D } from "../utils/types";
 import { useBoardTheme } from "./board-theme";

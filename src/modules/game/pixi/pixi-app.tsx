@@ -1,11 +1,11 @@
 import { Application, Container } from "pixi.js";
 import {
 	type Component,
+	type ParentProps,
 	createContext,
 	createResource,
 	onCleanup,
 	onMount,
-	type ParentProps,
 	untrack,
 	useContext,
 } from "solid-js";

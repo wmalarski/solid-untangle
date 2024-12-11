@@ -1,4 +1,4 @@
-import { createSignal, Show, type Component } from "solid-js";
+import { type Component, Show, createSignal } from "solid-js";
 import type { Player } from "~/modules/player/server/server";
 import { CursorsStateProvider } from "../contexts/cursors-state";
 import { GameConfigProvider } from "../contexts/game-config";

@@ -1,5 +1,5 @@
-import { createAsync, useParams, type RouteDefinition } from "@solidjs/router";
-import { createSignal, lazy, onMount, Show, Suspense } from "solid-js";
+import { type RouteDefinition, createAsync, useParams } from "@solidjs/router";
+import { Show, Suspense, createSignal, lazy, onMount } from "solid-js";
 import { GameLoader } from "~/modules/game/components/game-loader";
 import { getPlayerLoader } from "~/modules/player/server/client";
 

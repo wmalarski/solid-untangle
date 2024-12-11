@@ -1,10 +1,10 @@
 import {
 	type Accessor,
 	type Component,
+	type ParentProps,
 	createContext,
 	createMemo,
 	createSignal,
-	type ParentProps,
 	useContext,
 } from "solid-js";
 import type { Point2D } from "../utils/types";
