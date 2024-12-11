@@ -1,4 +1,4 @@
-import { type RouteDefinition, createAsync, useParams } from "@solidjs/router";
+import { useParams } from "@solidjs/router";
 import {
 	ErrorBoundary,
 	Show,
@@ -9,7 +9,6 @@ import {
 } from "solid-js";
 import { ErrorFallback } from "~/modules/common/components/error-fallback";
 import { GameLoader } from "~/modules/game/components/game-loader";
-import { getPlayerLoader } from "~/modules/player/server/client";
 
 const GameBoard = lazy(() =>
 	import("~/modules/game/components/game-board").then((module) => ({
@@ -17,15 +16,8 @@ const GameBoard = lazy(() =>
 	})),
 );
 
-export const route = {
-	load: async () => {
-		await getPlayerLoader();
-	},
-} satisfies RouteDefinition;
-
 export default function GamePage() {
 	const params = useParams();
-	const player = createAsync(() => getPlayerLoader());
 
 	const [isMounted, setIsMounted] = createSignal(false);
 
@@ -38,7 +30,7 @@ export default function GamePage() {
 			<ErrorBoundary fallback={ErrorFallback}>
 				<Suspense fallback={<GameLoader />}>
 					<Show when={isMounted()} fallback={<GameLoader />}>
-						<GameBoard gameId={params.gameId} player={player()} />
+						<GameBoard gameId={params.gameId} />
 					</Show>
 				</Suspense>
 			</ErrorBoundary>

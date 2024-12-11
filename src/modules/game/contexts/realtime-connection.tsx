@@ -4,6 +4,7 @@ import {
 	type ParentProps,
 	createContext,
 	createMemo,
+	onCleanup,
 	useContext,
 } from "solid-js";
 import { WebrtcProvider } from "y-webrtc";
@@ -13,23 +14,12 @@ import { useGameConfig } from "./game-config";
 const createRealtimeConnection = (gameId: string) => {
 	const ydoc = new Y.Doc({ autoLoad: true, shouldLoad: true });
 
-	// ydoc.transact()
-
 	const signaling = import.meta.env.VITE_WEBRTC_SIGNALING_URLS.split(",");
 	const provider = new WebrtcProvider(gameId, ydoc, { signaling });
 
-	// provider.
-
-	// persistence.
-
-	// provider.connect();
-	// ydoc.load();
-	// console.log("CONNECT");
-
-	// onCleanup(() => {
-	// 	provider.disconnect();
-	// 	console.log("DISCONNECT");
-	// });
+	onCleanup(() => {
+		provider.disconnect();
+	});
 
 	return provider;
 };
@@ -42,7 +32,8 @@ const RealtimeConnectionContext = createContext<
 
 export const RealtimeConnectionProvider: Component<ParentProps> = (props) => {
 	const config = useGameConfig();
-	const value = createMemo(() => createRealtimeConnection(config().gameId));
+	const gameId = createMemo(() => config().gameId);
+	const value = createMemo(() => createRealtimeConnection(gameId()));
 
 	return (
 		<RealtimeConnectionContext.Provider value={value}>
