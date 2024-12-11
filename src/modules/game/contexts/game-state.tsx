@@ -64,6 +64,10 @@ type GameStateStore = {
 	connections: Connection[];
 };
 
+type SetPositionPayload = Point2D & {
+	nodeId: string;
+};
+
 type CreateGameStateContextArgs = {
 	provider: WebrtcProvider;
 };
@@ -80,10 +84,20 @@ const createGameStateContext = ({ provider }: CreateGameStateContextArgs) => {
 		getConnectionPairs(store.connections),
 	);
 
-	const setPosition = (nodeId: string, position: Point2D) => {
+	const setPosition = (payload: SetPositionPayload) => {
 		setStore(
 			produce((state) => {
-				state.positions[nodeId] = position;
+				state.positions[payload.nodeId] = payload;
+			}),
+		);
+	};
+
+	const setPositions = (payloads: SetPositionPayload[]) => {
+		setStore(
+			produce((state) => {
+				for (const payload of payloads) {
+					state.positions[payload.nodeId] = payload;
+				}
 			}),
 		);
 	};
@@ -143,6 +157,7 @@ const createGameStateContext = ({ provider }: CreateGameStateContextArgs) => {
 	return {
 		store,
 		setPosition,
+		setPositions,
 		confirmPosition,
 		hasEnded,
 		startNewGame,

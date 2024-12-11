@@ -56,7 +56,8 @@ export const GraphNode: Component<GraphNodeProps> = (props) => {
 			});
 		},
 		onDragMove: () => {
-			game().setPosition(props.nodeId, {
+			game().setPosition({
+				nodeId: props.nodeId,
 				x: graphics.x,
 				y: graphics.y,
 			});

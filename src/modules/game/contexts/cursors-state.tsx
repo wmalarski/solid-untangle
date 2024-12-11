@@ -11,17 +11,18 @@ import {
 import { createStore, reconcile } from "solid-js/store";
 import type { WebrtcProvider } from "y-webrtc";
 import { REALTIME_THROTTLE_TIME } from "../utils/constants";
+import type { Point2D } from "../utils/types";
 import { useGameConfig } from "./game-config";
+import { useGameState } from "./game-state";
 import { useRealtimeConnection } from "./realtime-connection";
 
-type PlayerCursorState = {
-	x: number;
-	y: number;
+type PlayerCursorState = Point2D & {
+	nodeId: string | null;
 };
 
-type PlayerCursorPayload = {
+type PlayerCursorPayload = PlayerCursorState & {
 	playerId: string;
-} & PlayerCursorState;
+};
 
 type CursorsState = Record<string, PlayerCursorState | undefined>;
 
@@ -32,14 +33,23 @@ type CreateCursorsStateArgs = {
 
 const createCursorsState = ({ playerId, provider }: CreateCursorsStateArgs) => {
 	const [cursors, setCursors] = createStore<CursorsState>({});
+	const game = useGameState();
 
 	const onChange = () => {
+		const cursorsArray = Array.from(provider.awareness.getStates().values())
+			.filter((value) => value.cursor && value.cursor.playerId !== playerId)
+			.map((value) => value.cursor as PlayerCursorPayload);
+
 		const newCursors = Object.fromEntries(
-			Array.from(provider.awareness.getStates().values())
-				.filter((value) => value.cursor && value.cursor.playerId !== playerId)
-				.map((value) => [value.cursor.playerId, value.cursor]),
+			cursorsArray.map((cursor) => [cursor.playerId, cursor]),
 		);
+
 		setCursors(reconcile(newCursors));
+
+		const cursorsWithNodes = cursorsArray.flatMap((cursor) =>
+			cursor.nodeId ? [{ ...cursor, nodeId: cursor.nodeId }] : [],
+		);
+		game().setPositions(cursorsWithNodes);
 	};
 
 	provider.awareness.on("change", onChange);

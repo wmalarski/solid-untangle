@@ -17,6 +17,7 @@ import {
 
 import { useCursorsState } from "../contexts/cursors-state";
 import { usePresenceState } from "../contexts/presence-state";
+import { useSelectionState } from "../contexts/selection-state";
 import { useTransformState } from "../contexts/transform-state";
 import { getTextColor } from "../utils/colors";
 import { useBoardTheme } from "./board-theme";
@@ -98,12 +99,17 @@ const CursorGraphics: Component<CursorGraphicsProps> = (props) => {
 const usePlayerCursor = () => {
 	const container = usePixiContainer();
 	const cursors = useCursorsState();
+	const selection = useSelectionState();
 
 	const onPointerMove = (event: FederatedPointerEvent) => {
 		const transform = container.worldTransform;
 		const inverted = transform.applyInverse(event.global);
 
-		cursors().send({ x: inverted.x, y: inverted.y });
+		cursors().send({
+			x: inverted.x,
+			y: inverted.y,
+			nodeId: selection().selectedId(),
+		});
 	};
 
 	onMount(() => {

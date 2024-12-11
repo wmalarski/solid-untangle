@@ -25,18 +25,18 @@ export const GameBoard: Component<GameBoardProps> = (props) => {
 				<GameConfigProvider gameId={props.gameId} player={player()}>
 					<RealtimeConnectionProvider>
 						<PresenceStateProvider>
-							<CursorsStateProvider>
-								<SelectionStateProvider>
-									<GameStateProvider>
+							<SelectionStateProvider>
+								<GameStateProvider>
+									<CursorsStateProvider>
 										<ClientBoard />
 										<InfoBar />
 										<TopBar />
 										<ReloadDialog />
 										<PlayerDialog />
 										<SuccessConfetti />
-									</GameStateProvider>
-								</SelectionStateProvider>
-							</CursorsStateProvider>
+									</CursorsStateProvider>
+								</GameStateProvider>
+							</SelectionStateProvider>
 						</PresenceStateProvider>
 					</RealtimeConnectionProvider>
 				</GameConfigProvider>
