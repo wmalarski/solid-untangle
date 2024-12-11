@@ -6,7 +6,7 @@ import {
 	createMemo,
 	useContext,
 } from "solid-js";
-import type { Player } from "~/modules/player/server/server";
+import type { Player } from "../utils/player";
 
 type CreateGameConfigArgs = {
 	player: Player;

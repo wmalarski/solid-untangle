@@ -1,6 +1,5 @@
 import { type Component, For, Show, createMemo } from "solid-js";
 import { useI18n } from "~/modules/common/contexts/i18n";
-import type { Player } from "~/modules/player/server/server";
 import { Avatar, AvatarContent, AvatarGroup } from "~/ui/avatar/avatar";
 import {
 	DialogCloseButton,
@@ -16,6 +15,7 @@ import {
 import { XIcon } from "~/ui/icons/x-icon";
 import { usePresenceState } from "../contexts/presence-state";
 import { getTextColor } from "../utils/colors";
+import type { Player } from "../utils/player";
 
 const getFullPlayer = (player?: Player) => {
 	return player?.color && player.name

@@ -9,7 +9,7 @@ import {
 } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import type { WebrtcProvider } from "y-webrtc";
-import type { Player } from "~/modules/player/server/server";
+import type { Player } from "../utils/player";
 import { useGameConfig } from "./game-config";
 import { useRealtimeConnection } from "./realtime-connection";
 

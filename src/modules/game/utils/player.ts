@@ -1,17 +1,26 @@
 import { parse, serialize } from "cookie-es";
 import { nanoid } from "nanoid";
-import type { Player } from "~/modules/player/server/server";
+import * as v from "valibot";
 
 const PLAYER_COOKIE_KEY = "su_player";
 
-export const getPlayerCookie = () => {
-	const parsed = parse(document.cookie);
+const playerSchema = () => {
+	return v.object({
+		id: v.string(),
+		name: v.optional(v.string()),
+		color: v.optional(v.pipe(v.string(), v.hexColor())),
+	});
+};
 
-	const serialized = parsed[PLAYER_COOKIE_KEY];
+export type Player = v.InferOutput<ReturnType<typeof playerSchema>>;
+
+export const getPlayerCookie = () => {
+	const parsedCookie = parse(document.cookie);
 
 	try {
-		const value = JSON.parse(serialized);
-		return value as Player;
+		const parsedJson = JSON.parse(parsedCookie[PLAYER_COOKIE_KEY]);
+		const parsedPlayer = v.parse(playerSchema(), parsedJson);
+		return parsedPlayer as Player;
 	} catch {
 		return { id: nanoid() };
 	}

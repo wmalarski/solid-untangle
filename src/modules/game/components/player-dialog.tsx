@@ -1,15 +1,7 @@
-import { useSubmission } from "@solidjs/router";
 import { decode } from "decode-formdata";
-import {
-	type Component,
-	type ComponentProps,
-	Show,
-	createMemo,
-} from "solid-js";
+import { type Component, type ComponentProps, createMemo } from "solid-js";
 import * as v from "valibot";
 import { useI18n } from "~/modules/common/contexts/i18n";
-import { setPlayerDetailAction } from "~/modules/player/server/client";
-import type { Player } from "~/modules/player/server/server";
 import { Button } from "~/ui/button/button";
 import {
 	DialogContent,
@@ -21,7 +13,6 @@ import {
 	DialogTitle,
 } from "~/ui/dialog/dialog";
 import {
-	TextFieldErrorMessage,
 	TextFieldInput,
 	TextFieldLabel,
 	TextFieldLabelText,
@@ -29,7 +20,7 @@ import {
 } from "~/ui/text-field/text-field";
 import { useGameConfig } from "../contexts/game-config";
 import { randomHexColor } from "../utils/colors";
-import { setPlayerCookie } from "../utils/player";
+import { type Player, setPlayerCookie } from "../utils/player";
 
 type PlayerFormProps = {
 	onPlayerChange: (player: Player) => void;
@@ -40,8 +31,6 @@ const PlayerForm: Component<PlayerFormProps> = (props) => {
 
 	const config = useGameConfig();
 	const defaultPlayerColor = randomHexColor();
-
-	const submission = useSubmission(setPlayerDetailAction);
 
 	const onSubmit: ComponentProps<"form">["onSubmit"] = (event) => {
 		event.preventDefault();
@@ -66,24 +55,17 @@ const PlayerForm: Component<PlayerFormProps> = (props) => {
 					</TextFieldLabelText>
 				</TextFieldLabel>
 				<TextFieldInput
-					disabled={submission.pending}
 					id="name"
 					name="name"
 					placeholder={t("board.invite.username.placeholder")}
 					variant="bordered"
 				/>
-				<Show when={submission.result?.errors?.userName}>
-					<TextFieldErrorMessage>
-						{submission.result?.errors?.userName}
-					</TextFieldErrorMessage>
-				</Show>
 			</TextFieldRoot>
 			<TextFieldRoot>
 				<TextFieldLabel for="color">
 					<TextFieldLabelText>{t("board.invite.color")}</TextFieldLabelText>
 				</TextFieldLabel>
 				<TextFieldInput
-					disabled={submission.pending}
 					id="color"
 					name="color"
 					placeholder={t("board.invite.color")}
@@ -93,13 +75,7 @@ const PlayerForm: Component<PlayerFormProps> = (props) => {
 					width="full"
 				/>
 			</TextFieldRoot>
-			<Button
-				color="primary"
-				size="sm"
-				disabled={submission.pending}
-				isLoading={submission.pending}
-				type="submit"
-			>
+			<Button color="primary" size="sm" type="submit">
 				{t("board.invite.button")}
 			</Button>
 		</form>
