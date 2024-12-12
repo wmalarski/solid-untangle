@@ -10,12 +10,10 @@ import {
 	For,
 	Show,
 	createEffect,
-	createMemo,
 	onCleanup,
 	onMount,
 } from "solid-js";
-
-import { useCursorsState } from "../contexts/cursors-state";
+import { useLiveblocksConnection } from "../contexts/liveblocks-connection";
 import { usePresenceState } from "../contexts/presence-state";
 import { useSelectionState } from "../contexts/selection-state";
 import { useTransformState } from "../contexts/transform-state";
@@ -98,18 +96,20 @@ const CursorGraphics: Component<CursorGraphicsProps> = (props) => {
 
 const usePlayerCursor = () => {
 	const container = usePixiContainer();
-	const cursors = useCursorsState();
 	const selection = useSelectionState();
+	const liveblocks = useLiveblocksConnection();
 
 	const onPointerMove = (event: FederatedPointerEvent) => {
 		const transform = container.worldTransform;
 		const inverted = transform.applyInverse(event.global);
 
-		cursors().send({
-			x: inverted.x,
-			y: inverted.y,
-			nodeId: selection().selectedId(),
-		});
+		liveblocks().room.updatePresence({
+			cursor: {
+				x: inverted.x,
+				y: inverted.y,
+				nodeId: selection().selectedId(),
+			}
+		})
 	};
 
 	onMount(() => {
@@ -129,7 +129,6 @@ export const RemoteCursors: Component = () => {
 		zIndex: theme().cursorContainerZIndex,
 	});
 
-	const cursors = useCursorsState();
 	const presence = usePresenceState();
 	const transform = useTransformState();
 
@@ -143,26 +142,18 @@ export const RemoteCursors: Component = () => {
 
 	usePlayerCursor();
 
-	const playerIds = createMemo(() => {
-		return Object.keys(cursors().cursors);
-	});
-
 	return (
-		<For each={playerIds()}>
-			{(playerId) => (
-				<Show when={cursors().cursors[playerId]}>
-					{(state) => (
-						<Show when={presence().players[playerId]}>
-							{(player) => (
-								<CursorGraphics
-									color={player().color}
-									cursorsContainer={cursorsContainer}
-									name={player().name}
-									x={transform().x() + state().x * transform().scale()}
-									y={transform().y() + state().y * transform().scale()}
-								/>
-							)}
-						</Show>
+		<For each={presence()}>
+			{(other) => (
+				<Show when={other.presence.cursor}>
+					{(cursor) => (
+						<CursorGraphics
+							color={other.presence.player?.color}
+							cursorsContainer={cursorsContainer}
+							name={other.presence.player?.name}
+							x={transform().x() + cursor().x * transform().scale()}
+							y={transform().y() + cursor().y * transform().scale()}
+						/>
 					)}
 				</Show>
 			)}

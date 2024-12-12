@@ -15,7 +15,9 @@ const createLiveblocksConnection = (gameId: string) => {
 		publicApiKey: import.meta.env.VITE_LIVEBLOCK_PUBLIC_KEY,
 	});
 
-	const { room, leave } = client.enterRoom(gameId);
+	const { room, leave } = client.enterRoom(gameId, {
+		initialPresence: { cursor: null, player: null },
+	});
 
 	onCleanup(() => {
 		leave();
@@ -24,8 +26,12 @@ const createLiveblocksConnection = (gameId: string) => {
 	return { client, room };
 };
 
+export type LiveblocksConnection = ReturnType<
+	typeof createLiveblocksConnection
+>;
+
 const LiveblocksConnectionContext = createContext<
-	Accessor<ReturnType<typeof createLiveblocksConnection>>
+	Accessor<LiveblocksConnection>
 >(() => {
 	throw new Error("LiveblocksConnectionContext is not defined");
 });

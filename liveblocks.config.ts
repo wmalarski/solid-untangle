@@ -3,10 +3,9 @@
 declare global {
 	interface Liveblocks {
 		// Each user's Presence, for room.getPresence, room.subscribe("others"), etc.
-		// biome-ignore lint/complexity/noBannedTypes: <explanation>
 		Presence: {
-			// Example, real-time cursor coordinates
-			// cursor: { x: number; y: number };
+			cursor: { x: number; y: number; nodeId: string | null } | null;
+			player: { id: string; color?: string; name?: string } | null;
 		};
 
 		// The Storage tree for the room, for room.getStorage, room.subscribe(storageItem), etc.

@@ -1,4 +1,4 @@
-import { type Component, For, Show, createMemo } from "solid-js";
+import { type Component, For, Show } from "solid-js";
 import { useI18n } from "~/modules/common/contexts/i18n";
 import { Avatar, AvatarContent, AvatarGroup } from "~/ui/avatar/avatar";
 import {
@@ -17,7 +17,7 @@ import { usePresenceState } from "../contexts/presence-state";
 import { getTextColor } from "../utils/colors";
 import type { Player } from "../utils/player";
 
-const getFullPlayer = (player?: Player) => {
+const getFullPlayer = (player?: Player | null) => {
 	return player?.color && player.name
 		? { ...player, color: player.color, name: player.name }
 		: null;
@@ -51,13 +51,11 @@ const PlayerAvatar: Component<PlayerAvatarProps> = (props) => {
 const PlayersList: Component = () => {
 	const presence = usePresenceState();
 
-	const playerIds = createMemo(() => Object.keys(presence().players));
-
 	return (
 		<div class="flex max-h-[60vh] min-w-80 flex-col gap-4 overflow-y-auto">
-			<For each={playerIds()}>
-				{(playerId) => (
-					<Show when={getFullPlayer(presence().players[playerId])}>
+			<For each={presence()}>
+				{(other) => (
+					<Show when={getFullPlayer(other.presence.player)}>
 						{(player) => (
 							<div class="flex gap-4 p-2">
 								<PlayerAvatar player={player()} />
@@ -76,24 +74,20 @@ const MAX_AVATARS = 5;
 const Avatars: Component = () => {
 	const presence = usePresenceState();
 
-	const playerIds = createMemo(() => {
-		return Object.keys(presence().players);
-	});
-
 	return (
 		<AvatarGroup>
-			<For each={playerIds().slice(0, MAX_AVATARS)}>
-				{(playerId) => (
-					<Show when={getFullPlayer(presence().players[playerId])}>
+			<For each={presence().slice(0, MAX_AVATARS)}>
+				{(other) => (
+					<Show when={getFullPlayer(other.presence.player)}>
 						{(player) => <PlayerAvatar player={player()} />}
 					</Show>
 				)}
 			</For>
-			<Show when={playerIds().length > MAX_AVATARS}>
+			<Show when={presence().length > MAX_AVATARS}>
 				<Avatar>
 					<AvatarContent class="bg-base-300" ring="primary" size="xs">
 						<span class="flex size-full items-center justify-center">
-							{`+${playerIds().length - MAX_AVATARS}`}
+							{`+${presence().length - MAX_AVATARS}`}
 						</span>
 					</AvatarContent>
 				</Avatar>

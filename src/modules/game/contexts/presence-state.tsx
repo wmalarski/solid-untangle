@@ -3,45 +3,34 @@ import {
 	type Component,
 	type ParentProps,
 	createContext,
+	createEffect,
 	createMemo,
 	onCleanup,
 	useContext,
 } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
-import type { WebrtcProvider } from "y-webrtc";
-import type { Player } from "../utils/player";
 import { useGameConfig } from "./game-config";
-import { useRealtimeConnection } from "./realtime-connection";
-
-type PresenceState = Record<string, Player | undefined>;
+import {
+	type LiveblocksConnection,
+	useLiveblocksConnection,
+} from "./liveblocks-connection";
 
 type CreatePresenceStateArgs = {
-	player: Player;
-	provider: WebrtcProvider;
+	room: LiveblocksConnection["room"];
 };
 
-const createPresenceState = ({ player, provider }: CreatePresenceStateArgs) => {
-	const [players, setPlayers] = createStore<PresenceState>({});
+const createPresenceState = ({ room }: CreatePresenceStateArgs) => {
+	const [others, setOthers] = createStore(room.getOthers());
 
-	const onChange = () => {
-		const newPlayers = Object.fromEntries(
-			Array.from(provider.awareness.getStates().values()).map((value) => [
-				value.user.id,
-				value.user,
-			]),
-		);
-
-		setPlayers(reconcile(newPlayers));
-	};
-
-	provider.awareness.on("change", onChange);
-	onCleanup(() => {
-		provider.awareness.off("change", onChange);
+	const unsubscribeOthers = room.subscribe("others", (updatedOthers) => {
+		setOthers(reconcile(updatedOthers));
 	});
 
-	provider.awareness.setLocalStateField("user", player);
+	onCleanup(() => {
+		unsubscribeOthers();
+	});
 
-	return { players };
+	return others;
 };
 
 const PresenceStateContext = createContext<
@@ -52,14 +41,15 @@ const PresenceStateContext = createContext<
 
 export const PresenceStateProvider: Component<ParentProps> = (props) => {
 	const config = useGameConfig();
-	const realtimeConnection = useRealtimeConnection();
+	const liveblocks = useLiveblocksConnection();
 
 	const value = createMemo(() =>
-		createPresenceState({
-			player: config().player,
-			provider: realtimeConnection(),
-		}),
+		createPresenceState({ room: liveblocks().room }),
 	);
+
+	createEffect(() => {
+		liveblocks().room.updatePresence({ player: config().player });
+	});
 
 	return (
 		<PresenceStateContext.Provider value={value}>

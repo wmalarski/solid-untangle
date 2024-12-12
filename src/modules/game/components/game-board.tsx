@@ -1,6 +1,5 @@
 import { createWritableMemo } from "@solid-primitives/memo";
 import { type Component, Show, createSignal, lazy } from "solid-js";
-import { CursorsStateProvider } from "../contexts/cursors-state";
 import { GameConfigProvider } from "../contexts/game-config";
 import { GameStateProvider } from "../contexts/game-state";
 import { LiveblocksConnectionProvider } from "../contexts/liveblocks-connection";
@@ -34,14 +33,12 @@ export const GameBoard: Component<GameBoardProps> = (props) => {
 					<PresenceStateProvider>
 						<SelectionStateProvider>
 							<GameStateProvider>
-								<CursorsStateProvider>
-									<ClientBoard />
-									<InfoBar />
-									<TopBar />
-									<ReloadDialog />
-									<PlayerDialog onPlayerChange={setPlayer} />
-									<SuccessConfetti />
-								</CursorsStateProvider>
+								<ClientBoard />
+								<InfoBar />
+								<TopBar />
+								<ReloadDialog />
+								<PlayerDialog onPlayerChange={setPlayer} />
+								<SuccessConfetti />
 							</GameStateProvider>
 						</SelectionStateProvider>
 					</PresenceStateProvider>
