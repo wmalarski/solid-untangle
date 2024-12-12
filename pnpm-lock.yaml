@@ -14,6 +14,9 @@ importers:
       '@kobalte/tailwindcss':
         specifier: 0.9.0
         version: 0.9.0(tailwindcss@3.4.16)
+      '@liveblocks/client':
+        specifier: ^2.14.0
+        version: 2.14.0
       '@solid-primitives/i18n':
         specifier: 2.1.1
         version: 2.1.1(solid-js@1.9.3)
@@ -736,6 +739,12 @@ packages:
     resolution: {integrity: sha512-eeU60A3kprIiBDAfv9gUJX1tXGLuZiKMajUfSQURAF2pk4ZoMYiqIzmrMBvzcxP39xnYttgTyQEVLwiTZnrV4w==}
     peerDependencies:
       solid-js: ^1.8.8
+
+  '@liveblocks/client@2.14.0':
+    resolution: {integrity: sha512-XSsZpHVYTUSHFt0nPh7JRIpALBSU7rY1BSUCanvDyDbfArg7b9BXb/tojhB8UNvdYMU1UVSCD/syDco/2R3BCw==}
+
+  '@liveblocks/core@2.14.0':
+    resolution: {integrity: sha512-MbciLE8HprTaYxY5H0jq3VbUS1qLno8oEYvP63y/S3IWsSe0l61VlkDQdHcyhPzpjmYNSpN2rr5VhPDADsIRaA==}
 
   '@mapbox/node-pre-gyp@1.0.11':
     resolution: {integrity: sha512-Yhlar6v9WQgUp/He7BdgzOz8lqMQ8sU+jkCq7Wx8Myc5YFJLbEe7lgui/V7G1qB1DJykHSGwreceSaD60Y0PUQ==}
@@ -3599,6 +3608,12 @@ snapshots:
       '@solid-primitives/refs': 1.0.8(solid-js@1.9.3)
       '@solid-primitives/utils': 6.2.3(solid-js@1.9.3)
       solid-js: 1.9.3
+
+  '@liveblocks/client@2.14.0':
+    dependencies:
+      '@liveblocks/core': 2.14.0
+
+  '@liveblocks/core@2.14.0': {}
 
   '@mapbox/node-pre-gyp@1.0.11':
     dependencies:

@@ -3,6 +3,7 @@ import { type Component, Show, createSignal, lazy } from "solid-js";
 import { CursorsStateProvider } from "../contexts/cursors-state";
 import { GameConfigProvider } from "../contexts/game-config";
 import { GameStateProvider } from "../contexts/game-state";
+import { LiveblocksConnectionProvider } from "../contexts/liveblocks-connection";
 import { PresenceStateProvider } from "../contexts/presence-state";
 import { RealtimeConnectionProvider } from "../contexts/realtime-connection";
 import { SelectionStateProvider } from "../contexts/selection-state";
@@ -28,22 +29,24 @@ export const GameBoard: Component<GameBoardProps> = (props) => {
 
 	return (
 		<GameConfigProvider gameId={props.gameId} player={player()}>
-			<RealtimeConnectionProvider>
-				<PresenceStateProvider>
-					<SelectionStateProvider>
-						<GameStateProvider>
-							<CursorsStateProvider>
-								<ClientBoard />
-								<InfoBar />
-								<TopBar />
-								<ReloadDialog />
-								<PlayerDialog onPlayerChange={setPlayer} />
-								<SuccessConfetti />
-							</CursorsStateProvider>
-						</GameStateProvider>
-					</SelectionStateProvider>
-				</PresenceStateProvider>
-			</RealtimeConnectionProvider>
+			<LiveblocksConnectionProvider>
+				<RealtimeConnectionProvider>
+					<PresenceStateProvider>
+						<SelectionStateProvider>
+							<GameStateProvider>
+								<CursorsStateProvider>
+									<ClientBoard />
+									<InfoBar />
+									<TopBar />
+									<ReloadDialog />
+									<PlayerDialog onPlayerChange={setPlayer} />
+									<SuccessConfetti />
+								</CursorsStateProvider>
+							</GameStateProvider>
+						</SelectionStateProvider>
+					</PresenceStateProvider>
+				</RealtimeConnectionProvider>
+			</LiveblocksConnectionProvider>
 		</GameConfigProvider>
 	);
 };
