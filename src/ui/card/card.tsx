@@ -3,8 +3,8 @@ import type { VariantProps } from "class-variance-authority";
 import {
 	type Component,
 	type ComponentProps,
-	splitProps,
 	type ValidComponent,
+	splitProps,
 } from "solid-js";
 import { Dynamic, type DynamicProps } from "solid-js/web";
 
