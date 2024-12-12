@@ -1,18 +1,23 @@
 import { createWritableMemo } from "@solid-primitives/memo";
-import { type Component, Show, createSignal } from "solid-js";
+import { type Component, Show, createSignal, lazy } from "solid-js";
 import { CursorsStateProvider } from "../contexts/cursors-state";
 import { GameConfigProvider } from "../contexts/game-config";
 import { GameStateProvider } from "../contexts/game-state";
 import { PresenceStateProvider } from "../contexts/presence-state";
 import { RealtimeConnectionProvider } from "../contexts/realtime-connection";
 import { SelectionStateProvider } from "../contexts/selection-state";
-import { PixiStage } from "../pixi/pixi-stage";
 import { getPlayerCookie } from "../utils/player";
 import { InfoBar } from "./info-bar";
 import { PlayerDialog } from "./player-dialog";
 import { ReloadDialog } from "./reload-dialog";
 import { SuccessConfetti } from "./success-confetti";
 import { TopBar } from "./top-bar";
+
+const PixiStage = lazy(() =>
+	import("../pixi/pixi-stage").then((module) => ({
+		default: module.PixiStage,
+	})),
+);
 
 type GameBoardProps = {
 	gameId: string;
