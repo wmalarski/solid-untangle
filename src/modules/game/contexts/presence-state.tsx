@@ -23,7 +23,7 @@ const createPresenceState = ({ room }: CreatePresenceStateArgs) => {
 	const [others, setOthers] = createStore(room.getOthers());
 
 	const unsubscribeOthers = room.subscribe("others", (updatedOthers) => {
-		setOthers(reconcile(updatedOthers));
+		setOthers(reconcile(updatedOthers, { key: "id" }));
 	});
 
 	onCleanup(() => {

@@ -25,6 +25,7 @@ const fire = async ({ particleCount, xMin, xMax, text }: FireArgs) => {
 		shapes,
 		particleCount,
 		origin: { x: randomInRange(xMin, xMax), y: Math.random() - 0.2 },
+		zIndex: 100,
 	});
 };
 

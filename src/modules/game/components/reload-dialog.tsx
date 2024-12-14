@@ -57,7 +57,7 @@ const ReloadForm: Component = () => {
 					type="number"
 					size="sm"
 					min={10}
-					value={20}
+					value={Object.entries(game().store.positions).length}
 					max={50}
 					required
 				/>

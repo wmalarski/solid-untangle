@@ -37,11 +37,10 @@ const CursorGraphics: Component<CursorGraphicsProps> = (props) => {
 	const theme = useBoardTheme();
 
 	const graphics = new Graphics({ zIndex: theme().cursorGraphicsZIndex });
-
 	const style = new TextStyle({ fontSize: 16 });
 	const text = new Text({ style, zIndex: theme().cursorTextZIndex });
 
-	onMount(() => {
+	createEffect(() => {
 		if (!props.name || !props.color) {
 			return;
 		}
@@ -108,8 +107,8 @@ const usePlayerCursor = () => {
 				x: inverted.x,
 				y: inverted.y,
 				nodeId: selection().selectedId(),
-			}
-		})
+			},
+		});
 	};
 
 	onMount(() => {
