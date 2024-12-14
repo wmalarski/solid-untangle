@@ -105,6 +105,7 @@ const createGameStateContext = ({ room }: CreateGameStateContextArgs) => {
 			unsubscribes.push(
 				room.subscribe(value, (node) => {
 					setPosition({ nodeId, ...node.toObject() });
+					checkForEnding();
 				}),
 			);
 		});
@@ -187,6 +188,7 @@ const createGameStateContext = ({ room }: CreateGameStateContextArgs) => {
 			livePositions().unsubscribe();
 			state().setStore(getInitialStore(node));
 			setLivePositions(getInitialLive(node));
+			setHasEnded(false);
 		});
 
 		onCleanup(() => {
