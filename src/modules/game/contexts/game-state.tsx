@@ -13,8 +13,6 @@ import {
 	useContext,
 } from "solid-js";
 import { createStore, produce } from "solid-js/store";
-import type { WebrtcProvider } from "y-webrtc";
-import type {} from "yjs";
 import { createLiveGame } from "../utils/creator";
 import { checkForCrossing } from "../utils/geometry";
 import type { Connection, Point2D } from "../utils/types";
@@ -22,7 +20,6 @@ import {
 	type LiveblocksConnection,
 	useLiveblocksConnection,
 } from "./liveblocks-connection";
-import { useRealtimeConnection } from "./realtime-connection";
 
 const getConnectionPairs = (connections: Connection[]) => {
 	return connections.flatMap((connection, index) => {
@@ -77,7 +74,6 @@ export type SetPositionPayload = Point2D & {
 };
 
 type CreateGameStateContextArgs = {
-	provider: WebrtcProvider;
 	room: LiveblocksConnection["room"];
 };
 
@@ -227,14 +223,10 @@ const GameStateContext = createContext<
 });
 
 export const GameStateProvider: Component<ParentProps> = (props) => {
-	const realtimeConnection = useRealtimeConnection();
 	const liveblocks = useLiveblocksConnection();
 
 	const value = createMemo(() =>
-		createGameStateContext({
-			provider: realtimeConnection(),
-			room: liveblocks().room,
-		}),
+		createGameStateContext({ room: liveblocks().room }),
 	);
 
 	return (

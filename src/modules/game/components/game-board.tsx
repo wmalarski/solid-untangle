@@ -4,7 +4,6 @@ import { GameConfigProvider } from "../contexts/game-config";
 import { GameStateProvider } from "../contexts/game-state";
 import { LiveblocksConnectionProvider } from "../contexts/liveblocks-connection";
 import { PresenceStateProvider } from "../contexts/presence-state";
-import { RealtimeConnectionProvider } from "../contexts/realtime-connection";
 import { SelectionStateProvider } from "../contexts/selection-state";
 import { getPlayerCookie } from "../utils/player";
 import { InfoBar } from "./info-bar";
@@ -29,20 +28,18 @@ export const GameBoard: Component<GameBoardProps> = (props) => {
 	return (
 		<GameConfigProvider gameId={props.gameId} player={player()}>
 			<LiveblocksConnectionProvider>
-				<RealtimeConnectionProvider>
-					<PresenceStateProvider>
-						<SelectionStateProvider>
-							<GameStateProvider>
-								<ClientBoard />
-								<InfoBar />
-								<TopBar />
-								<ReloadDialog />
-								<PlayerDialog onPlayerChange={setPlayer} />
-								<SuccessConfetti />
-							</GameStateProvider>
-						</SelectionStateProvider>
-					</PresenceStateProvider>
-				</RealtimeConnectionProvider>
+				<PresenceStateProvider>
+					<SelectionStateProvider>
+						<GameStateProvider>
+							<ClientBoard />
+							<InfoBar />
+							<TopBar />
+							<ReloadDialog />
+							<PlayerDialog onPlayerChange={setPlayer} />
+							<SuccessConfetti />
+						</GameStateProvider>
+					</SelectionStateProvider>
+				</PresenceStateProvider>
 			</LiveblocksConnectionProvider>
 		</GameConfigProvider>
 	);
