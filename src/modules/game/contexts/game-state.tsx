@@ -1,4 +1,5 @@
 import { LiveMap, type LiveObject } from "@liveblocks/client";
+import { createWritableMemo } from "@solid-primitives/memo";
 import { createAsync } from "@solidjs/router";
 import {
 	type Accessor,
@@ -23,11 +24,6 @@ import {
 } from "./liveblocks-connection";
 import { useRealtimeConnection } from "./realtime-connection";
 
-// const SYNC_KEY = "sync";
-// const CONNECTION_KEY = "connections";
-const POSITIONS_KEY = "positions";
-// const DEFAULT_GAME_SIZE = 10;
-
 const getConnectionPairs = (connections: Connection[]) => {
 	return connections.flatMap((connection, index) => {
 		const nodes = new Set([connection.end, connection.start]);
@@ -50,6 +46,27 @@ const detectCrossing = (
 	});
 };
 
+type RootLiveObject = Awaited<
+	ReturnType<LiveblocksConnection["room"]["getStorage"]>
+>["root"];
+
+const getInitialStore = (root?: RootLiveObject): GameStateStore => {
+	if (!root) {
+		return { connections: [], positions: {} };
+	}
+
+	const positions = root.get("positions");
+	return {
+		connections: root.get("connections").toArray(),
+		positions: Object.fromEntries(
+			Array.from(positions.entries()).map(([nodeId, livePosition]) => [
+				nodeId,
+				livePosition.toObject(),
+			]),
+		),
+	};
+};
+
 type GameStateStore = {
 	positions: Record<string, Point2D>;
 	connections: Connection[];
@@ -67,21 +84,53 @@ type CreateGameStateContextArgs = {
 const createGameStateContext = ({ room }: CreateGameStateContextArgs) => {
 	const [hasEnded, setHasEnded] = createSignal(false);
 
-	const [livePositions, setLivePositions] = createSignal({
-		positions: new LiveMap<string, LiveObject<Point2D>>(),
-		unsubscribe: [() => {}],
+	const storage = createAsync(() => room.getStorage());
+
+	const state = createMemo(() => {
+		const [store, setStore] = createStore(getInitialStore(storage()?.root));
+		return { store, setStore };
 	});
-	const [store, setStore] = createStore<GameStateStore>({
-		connections: [],
-		positions: {},
+
+	const getInitialLive = (root?: RootLiveObject) => {
+		if (!root) {
+			return {
+				positions: new LiveMap<string, LiveObject<Point2D>>(),
+				unsubscribe: () => {},
+			};
+		}
+
+		const unsubscribes: (() => void)[] = [];
+		const positions = root.get("positions");
+		positions.forEach((value, nodeId) => {
+			unsubscribes.push(
+				room.subscribe(value, (node) => {
+					setPosition({ nodeId, ...node.toObject() });
+				}),
+			);
+		});
+
+		const unsubscribe = () => {
+			for (const callback of unsubscribes) {
+				callback();
+			}
+		};
+
+		return { positions, unsubscribe };
+	};
+
+	const [livePositions, setLivePositions] = createWritableMemo<
+		ReturnType<typeof getInitialLive>
+	>((previous) => {
+		previous?.unsubscribe();
+		return getInitialLive(storage()?.root);
 	});
 
 	const connectionPairs = createMemo(() =>
-		getConnectionPairs(store.connections),
+		getConnectionPairs(state().store.connections),
 	);
 
 	const setPosition = (payload: SetPositionPayload) => {
-		setStore(
+		state().setStore(
 			produce((state) => {
 				state.positions[payload.nodeId] = payload;
 			}),
@@ -89,7 +138,7 @@ const createGameStateContext = ({ room }: CreateGameStateContextArgs) => {
 	};
 
 	const setPositions = (payloads: SetPositionPayload[]) => {
-		setStore(
+		state().setStore(
 			produce((state) => {
 				for (const payload of payloads) {
 					state.positions[payload.nodeId] = payload;
@@ -101,7 +150,7 @@ const createGameStateContext = ({ room }: CreateGameStateContextArgs) => {
 	const checkForEnding = () => {
 		const pairs = connectionPairs();
 		if (pairs.length > 0) {
-			const hasCrossing = detectCrossing(pairs, store.positions);
+			const hasCrossing = detectCrossing(pairs, state().store.positions);
 			setHasEnded(!hasCrossing);
 		}
 	};
@@ -123,11 +172,9 @@ const createGameStateContext = ({ room }: CreateGameStateContextArgs) => {
 		room.batch(() => {
 			const { connections, positions } = createLiveGame(nodes);
 			storage.root.set("connections", connections);
-			storage.root.set(POSITIONS_KEY, positions);
+			storage.root.set("positions", positions);
 		});
 	};
-
-	const storage = createAsync(() => room.getStorage());
 
 	createEffect(() => {
 		const root = storage()?.root;
@@ -137,38 +184,21 @@ const createGameStateContext = ({ room }: CreateGameStateContextArgs) => {
 		}
 
 		const unsubscribe = room.subscribe(root, (node) => {
-			const positions = node.get("positions");
-			setStore({
-				connections: node.get("connections").toArray(),
-				positions: Object.fromEntries(
-					Array.from(positions.entries()).map(([nodeId, livePosition]) => [
-						nodeId,
-						livePosition.toObject(),
-					]),
-				),
-			});
-
-			for (const callback of livePositions().unsubscribe) {
-				callback();
-			}
-
-			const unsubscribe: (() => void)[] = [];
-			positions.forEach((value, key) => {
-				unsubscribe.push(
-					room.subscribe(value, (node) =>
-						setStore("positions", key, node.toObject()),
-					),
-				);
-			});
-
-			setLivePositions({ positions, unsubscribe });
+			livePositions().unsubscribe();
+			state().setStore(getInitialStore(node));
+			setLivePositions(getInitialLive(node));
 		});
 
-		onCleanup(() => unsubscribe());
+		onCleanup(() => {
+			unsubscribe();
+			livePositions().unsubscribe();
+		});
 	});
 
 	return {
-		store,
+		get store() {
+			return state().store;
+		},
 		setPosition,
 		setPositions,
 		confirmPosition,
