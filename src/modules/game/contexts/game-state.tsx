@@ -197,6 +197,17 @@ const createGameStateContext = ({ room }: CreateGameStateContextArgs) => {
 		});
 	});
 
+	const unsubscribe = room.subscribe("others", (updatedOthers) => {
+		for (const other of updatedOthers) {
+			const cursor = other.presence.cursor;
+			const nodeId = cursor?.nodeId;
+			if (nodeId) {
+				setPosition({ ...cursor, nodeId });
+			}
+		}
+	});
+	onCleanup(() => unsubscribe());
+
 	return {
 		get store() {
 			return state().store;
