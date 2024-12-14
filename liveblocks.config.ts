@@ -1,7 +1,6 @@
 // Define Liveblocks types for your application
 
 import type { LiveList, LiveMap, LiveObject } from "@liveblocks/client";
-import type { SetPositionPayload } from "~/modules/game/contexts/game-state";
 import type { Player } from "~/modules/game/utils/player";
 import type { Connection, Point2D } from "~/modules/game/utils/types";
 
@@ -10,7 +9,7 @@ declare global {
 	interface Liveblocks {
 		// Each user's Presence, for room.getPresence, room.subscribe("others"), etc.
 		Presence: {
-			cursor: SetPositionPayload | null;
+			cursor: (Point2D & { nodeId: string | null }) | null;
 			player: Player | null;
 		};
 

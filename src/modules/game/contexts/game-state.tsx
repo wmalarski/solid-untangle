@@ -1,4 +1,4 @@
-import {} from "@liveblocks/client";
+import { LiveMap, type LiveObject } from "@liveblocks/client";
 import { createAsync } from "@solidjs/router";
 import {
 	type Accessor,
@@ -11,10 +11,11 @@ import {
 	onCleanup,
 	useContext,
 } from "solid-js";
-import { createStore } from "solid-js/store";
+import { createStore, produce } from "solid-js/store";
 import type { WebrtcProvider } from "y-webrtc";
 import type {} from "yjs";
 import { createLiveGame } from "../utils/creator";
+import { checkForCrossing } from "../utils/geometry";
 import type { Connection, Point2D } from "../utils/types";
 import {
 	type LiveblocksConnection,
@@ -27,42 +28,27 @@ import { useRealtimeConnection } from "./realtime-connection";
 const POSITIONS_KEY = "positions";
 // const DEFAULT_GAME_SIZE = 10;
 
-// const getConnectionPairs = (connections: Connection[]) => {
-// 	return connections.flatMap((connection, index) => {
-// 		const nodes = new Set([connection.end, connection.start]);
-// 		return connections
-// 			.slice(index + 1)
-// 			.filter((entry) => !nodes.has(entry.end) && !nodes.has(entry.start))
-// 			.map((entry) => [connection, entry] as const);
-// 	});
-// };
+const getConnectionPairs = (connections: Connection[]) => {
+	return connections.flatMap((connection, index) => {
+		const nodes = new Set([connection.end, connection.start]);
+		return connections
+			.slice(index + 1)
+			.filter((entry) => !nodes.has(entry.end) && !nodes.has(entry.start))
+			.map((entry) => [connection, entry] as const);
+	});
+};
 
-// const detectCrossing = (
-// 	connectionPairs: (readonly [Connection, Connection])[],
-// 	positions: Record<string, Point2D>,
-// ) => {
-// 	return connectionPairs.some(([first, second]) => {
-// 		return checkForCrossing(
-// 			{ start: positions[first.start], end: positions[first.end] },
-// 			{ start: positions[second.start], end: positions[second.end] },
-// 		);
-// 	});
-// };
-
-// const onDetectIsBoardInitialized = (
-// 	provider: WebrtcProvider,
-// 	callback: (isInitialized: boolean) => void,
-// ) => {
-// 	const onAwarenessChange = (event: { added: number[] }) => {
-// 		if (event.added.length > 0) {
-// 			callback(true);
-// 			clearTimeout(timeout);
-// 		}
-// 	};
-// 	provider.awareness.once("change", onAwarenessChange);
-// 	const timeout = setTimeout(() => callback(false), 1000);
-// 	onCleanup(() => clearTimeout(timeout));
-// };
+const detectCrossing = (
+	connectionPairs: (readonly [Connection, Connection])[],
+	positions: Record<string, Point2D>,
+) => {
+	return connectionPairs.some(([first, second]) => {
+		return checkForCrossing(
+			{ start: positions[first.start], end: positions[first.end] },
+			{ start: positions[second.start], end: positions[second.end] },
+		);
+	});
+};
 
 type GameStateStore = {
 	positions: Record<string, Point2D>;
@@ -70,7 +56,7 @@ type GameStateStore = {
 };
 
 export type SetPositionPayload = Point2D & {
-	nodeId: string | null;
+	nodeId: string;
 };
 
 type CreateGameStateContextArgs = {
@@ -81,47 +67,52 @@ type CreateGameStateContextArgs = {
 const createGameStateContext = ({ room }: CreateGameStateContextArgs) => {
 	const [hasEnded, setHasEnded] = createSignal(false);
 
-	const [store] = createStore<GameStateStore>({
+	const [livePositions, setLivePositions] = createSignal({
+		positions: new LiveMap<string, LiveObject<Point2D>>(),
+		unsubscribe: [() => {}],
+	});
+	const [store, setStore] = createStore<GameStateStore>({
 		connections: [],
 		positions: {},
 	});
 
-	// const connectionPairs = createMemo(() =>
-	// 	getConnectionPairs(store.connections),
-	// );
+	const connectionPairs = createMemo(() =>
+		getConnectionPairs(store.connections),
+	);
 
-	const setPosition = (_payload: SetPositionPayload) => {
-		// setStore(
-		// 	produce((state) => {
-		// 		state.positions[payload.nodeId] = payload;
-		// 	}),
-		// );
+	const setPosition = (payload: SetPositionPayload) => {
+		setStore(
+			produce((state) => {
+				state.positions[payload.nodeId] = payload;
+			}),
+		);
 	};
 
-	const setPositions = (_payloads: SetPositionPayload[]) => {
-		// setStore(
-		// 	produce((state) => {
-		// 		for (const payload of payloads) {
-		// 			state.positions[payload.nodeId] = payload;
-		// 		}
-		// 	}),
-		// );
+	const setPositions = (payloads: SetPositionPayload[]) => {
+		setStore(
+			produce((state) => {
+				for (const payload of payloads) {
+					state.positions[payload.nodeId] = payload;
+				}
+			}),
+		);
 	};
 
-	// const connectionsArray = provider.doc.getArray<Connection>(CONNECTION_KEY);
-	// const positionsMap = provider.doc.getMap<Point2D>(POSITIONS_KEY);
+	const checkForEnding = () => {
+		const pairs = connectionPairs();
+		if (pairs.length > 0) {
+			const hasCrossing = detectCrossing(pairs, store.positions);
+			setHasEnded(!hasCrossing);
+		}
+	};
 
-	// const checkForEnding = () => {
-	// 	const pairs = connectionPairs();
-	// 	if (pairs.length > 0) {
-	// 		const hasCrossing = detectCrossing(pairs, store.positions);
-	// 		setHasEnded(!hasCrossing);
-	// 	}
-	// };
+	const confirmPosition = (nodeId: string, position: Point2D) => {
+		room.batch(() => {
+			livePositions().positions.get(nodeId)?.set("x", position.x);
+			livePositions().positions.get(nodeId)?.set("y", position.y);
+		});
 
-	const confirmPosition = (_nodeId: string, _position: Point2D) => {
-		// positionsMap.set(nodeId, position);
-		// checkForEnding();
+		checkForEnding();
 	};
 
 	const startNewGame = async (nodes: number) => {
@@ -131,89 +122,49 @@ const createGameStateContext = ({ room }: CreateGameStateContextArgs) => {
 
 		room.batch(() => {
 			const { connections, positions } = createLiveGame(nodes);
-
-			// const liveConnections = storage.root.get("connections");
-			// const livePositions = storage.root.get("positions");
-			// liveConnections.clear();
-			// livePositions.clear();
-
-			// for (const connection of connections) {
-			// 	liveConnections.push(connection)
-			// }
-
-			// for (const )
-
 			storage.root.set("connections", connections);
 			storage.root.set(POSITIONS_KEY, positions);
 		});
-
-		// provider.doc.transact(() => {
-		// 	connectionsArray.delete(0, connectionsArray.length);
-		// 	connectionsArray.push(connections);
-
-		// 	positionsMap.clear();
-		// 	for (const [nodeId, position] of Object.entries(positions)) {
-		// 		positionsMap.set(nodeId, position);
-		// 	}
-		// });
 	};
-
-	// const onDocUpdate = () => {
-	// 	setStore(
-	// 		reconcile({
-	// 			connections: connectionsArray.toArray(),
-	// 			positions: positionsMap.toJSON(),
-	// 		}),
-	// 	);
-	// 	checkForEnding();
-	// };
-	// provider.doc.on("updateV2", onDocUpdate);
-	// onCleanup(() => provider.doc.off("updateV2", onDocUpdate));
-
-	// onDetectIsBoardInitialized(provider, async (isInitialized) => {
-	// 	if (isInitialized) {
-	// 		provider.doc.getText(SYNC_KEY).setAttribute(SYNC_KEY, nanoid());
-	// 		return;
-	// 	}
-	// 	await startNewGame(DEFAULT_GAME_SIZE);
-	// });
 
 	const storage = createAsync(() => room.getStorage());
 
 	createEffect(() => {
-		console.log("storage", storage());
-	});
-
-	const connectionsMemo = createMemo(() => {
 		const root = storage()?.root;
 
 		if (!root) {
-			return () => [];
+			return;
 		}
 
-		const [connections, setConnection] = createSignal(
-			root.get("connections").toArray(),
-		);
-
 		const unsubscribe = room.subscribe(root, (node) => {
-			setConnection(node.get("connections").toArray());
+			const positions = node.get("positions");
+			setStore({
+				connections: node.get("connections").toArray(),
+				positions: Object.fromEntries(
+					Array.from(positions.entries()).map(([nodeId, livePosition]) => [
+						nodeId,
+						livePosition.toObject(),
+					]),
+				),
+			});
+
+			for (const callback of livePositions().unsubscribe) {
+				callback();
+			}
+
+			const unsubscribe: (() => void)[] = [];
+			positions.forEach((value, key) => {
+				unsubscribe.push(
+					room.subscribe(value, (node) =>
+						setStore("positions", key, node.toObject()),
+					),
+				);
+			});
+
+			setLivePositions({ positions, unsubscribe });
 		});
 
 		onCleanup(() => unsubscribe());
-
-		return connections;
-	});
-	const connections = createMemo(() => connectionsMemo()());
-
-	// room.getStorageSnapshot()?.get()
-
-	// createMemo(() => {
-	// 	// const snapshot = room.getStorageSnapshot()?.get("connections");
-	// 	// const [connections, setConnections] =
-	// })
-
-	createEffect(() => {
-		console.log("connections", JSON.stringify(connections(), null, 2));
 	});
 
 	return {
