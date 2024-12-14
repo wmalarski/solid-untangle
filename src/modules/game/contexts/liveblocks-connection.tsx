@@ -8,6 +8,7 @@ import {
 	onCleanup,
 	useContext,
 } from "solid-js";
+import { createLiveGame } from "../utils/creator";
 import { useGameConfig } from "./game-config";
 
 const createLiveblocksConnection = (gameId: string) => {
@@ -17,6 +18,7 @@ const createLiveblocksConnection = (gameId: string) => {
 
 	const { room, leave } = client.enterRoom(gameId, {
 		initialPresence: { cursor: null, player: null },
+		initialStorage: createLiveGame(20),
 	});
 
 	onCleanup(() => {

@@ -39,8 +39,8 @@ const ReloadForm: Component = () => {
 		);
 
 		const { startNewGame } = game();
-		startNewGame(data.nodes);
 		selection().clear();
+		await startNewGame(data.nodes);
 	};
 
 	return (

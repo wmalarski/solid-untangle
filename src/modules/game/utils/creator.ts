@@ -1,3 +1,4 @@
+import { LiveList, LiveMap, LiveObject } from "@liveblocks/client";
 import { nanoid } from "nanoid";
 import type { Connection, Point2D } from "./types";
 
@@ -205,6 +206,20 @@ export const createGame = (nodes: number) => {
 	const connections = getConnections(neighbors);
 	const nodeIds = Array.from(neighbors.keys());
 	const positions = getPositions(nodeIds, width, height);
+
+	return { connections, positions };
+};
+
+export const createLiveGame = (nodes: number) => {
+	const game = createGame(nodes);
+
+	const connections = new LiveList(game.connections);
+	const positions = new LiveMap(
+		Object.entries(game.positions).map(([nodeId, point]) => [
+			nodeId,
+			new LiveObject(point),
+		]),
+	);
 
 	return { connections, positions };
 };

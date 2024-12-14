@@ -1,28 +1,33 @@
 // Define Liveblocks types for your application
+
+import type { LiveList, LiveMap, LiveObject } from "@liveblocks/client";
+import type { SetPositionPayload } from "~/modules/game/contexts/game-state";
+import type { Player } from "~/modules/game/utils/player";
+import type { Connection, Point2D } from "~/modules/game/utils/types";
+
 // https://liveblocks.io/docs/api-reference/liveblocks-client#Typing-your-data
 declare global {
 	interface Liveblocks {
 		// Each user's Presence, for room.getPresence, room.subscribe("others"), etc.
 		Presence: {
-			cursor: { x: number; y: number; nodeId: string | null } | null;
-			player: { id: string; color?: string; name?: string } | null;
+			cursor: SetPositionPayload | null;
+			player: Player | null;
 		};
 
 		// The Storage tree for the room, for room.getStorage, room.subscribe(storageItem), etc.
-		// biome-ignore lint/complexity/noBannedTypes: <explanation>
 		Storage: {
 			// Example, a conflict-free list
-			// animals: LiveList<string>;
+			connections: LiveList<Connection>;
+			positions: LiveMap<string, LiveObject<Point2D>>;
 		};
 
 		// Custom user info set when authenticating with a secret key
 		UserMeta: {
 			id: string;
-			// biome-ignore lint/complexity/noBannedTypes: <explanation>
 			info: {
 				// Example properties, for room.getSelf, room.subscribe("others"), etc.
-				// name: string;
-				// avatar: string;
+				color: string;
+				name: string;
 			};
 		};
 
@@ -50,5 +55,3 @@ declare global {
 		};
 	}
 }
-
-export {};
